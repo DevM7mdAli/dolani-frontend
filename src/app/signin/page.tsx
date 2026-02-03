@@ -12,6 +12,8 @@ import { Eye, EyeSlash } from 'iconsax-react';
 
 export default function SignInPage(): JSX.Element {
   const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -43,6 +45,8 @@ export default function SignInPage(): JSX.Element {
                 placeholder="user@example.com"
                 className="h-11"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -60,6 +64,8 @@ export default function SignInPage(): JSX.Element {
                   placeholder="Enter your password"
                   className="h-11"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
 
                 <button
