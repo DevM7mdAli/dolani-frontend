@@ -1,8 +1,10 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
 
-export function middleware(request: NextRequest): NextResponse<unknown> | undefined {
-  if (request.nextUrl.pathname === '/') {
-    return NextResponse.rewrite(new URL('/signin', request.url));
-  }
-}
+import { routing } from './i18n/routing';
+
+export default createMiddleware(routing);
+
+export const config = {
+  // Match only internationalized pathnames
+  matcher: ['/', '/(ar|en)/:path*'],
+};

@@ -1,0 +1,23 @@
+{
+  "Common": {
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "doctors": "Faculty",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "welcome": "Welcome to Dolani"
+  },
+  "Admin": {
+    "analytics": "Analytics",
+    "mapEditor": "Map Editor",
+    "rooms": "Rooms",
+    "faculty": "Faculty"
+  },
+  "Faculty": {
+    "status": "Status",
+    "schedule": "Schedule",
+    "available": "Available",
+    "busy": "Busy",
+    "away": "Away"
+  }
+}
