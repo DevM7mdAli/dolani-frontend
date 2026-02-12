@@ -49,12 +49,12 @@
   --popover-foreground: #0a4d5c;
 
   /* Brand */
-  --primary: #0a4d5c;
+  --primary: #008080;
   --primary-foreground: #ffffff;
 
   /* Secondary (Yellow) */
-  --secondary: #fdb913;
-  --secondary-foreground: #0a4d5c;
+  --secondary: #ffd700;
+  --secondary-foreground: #004d4d;
 
   /* Muted */
   --muted: #e8f4f8;

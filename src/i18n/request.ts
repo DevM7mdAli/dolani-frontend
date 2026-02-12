@@ -1,11 +1,19 @@
 import { getRequestConfig } from 'next-intl/server';
 
-export default getRequestConfig(async () => {
-  // Static for now, we'll change this later
-  const locale = 'en';
+import { routing } from './routing';
+
+export default getRequestConfig(async ({ requestLocale }) => {
+  let locale = await requestLocale;
+
+  // Ensure that a valid locale is used
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!locale || !routing.locales.includes(locale as any)) {
+    locale = routing.defaultLocale;
+  }
 
   return {
     locale,
     messages: (await import(`../messages/${locale}.json`)).default,
+    timeZone: 'Asia/Riyadh',
   };
 });

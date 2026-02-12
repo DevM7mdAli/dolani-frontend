@@ -25,7 +25,11 @@ export function Providers({ children, locale, messages, timeZone }: Props) {
   );
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
+    <NextIntlClientProvider
+      locale={locale}
+      messages={messages}
+      timeZone={timeZone ?? 'Asia/Riyadh'}
+    >
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </NextIntlClientProvider>
   );
