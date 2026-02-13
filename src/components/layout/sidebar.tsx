@@ -1,6 +1,7 @@
 'use client';
 
-import { Link, usePathname } from '@/i18n/routing';
+import { useLogout } from '@/hooks/useAuth';
+import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { useUIStore } from '@/store/useUIStore';
 import {
   ChevronLeft,
@@ -20,8 +21,18 @@ import { cn } from '@/lib/utils';
 export function Sidebar() {
   const t = useTranslations('Admin');
   const tCommon = useTranslations('Common');
+  const router = useRouter();
   const { isSidebarCollapsed, toggleSidebar } = useUIStore();
   const pathname = usePathname();
+  const logoutMutation = useLogout();
+
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        router.push('/');
+      },
+    });
+  };
 
   const links = [
     { href: '/dashboard/admin', label: t('analytics'), icon: LayoutDashboard },
@@ -66,17 +77,18 @@ export function Sidebar() {
       </nav>
 
       <div className="border-border border-t p-4">
-        <Link href="/signin">
-          <div
-            className={cn(
-              'hover:bg-destructive/10 hover:text-destructive text-muted-foreground flex items-center gap-2 rounded-md p-2 transition-colors',
-              isSidebarCollapsed && 'justify-center',
-            )}
-          >
-            <LogOut className="h-5 w-5" />
-            {!isSidebarCollapsed && <span>{tCommon('signOut')}</span>}
-          </div>
-        </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground w-full justify-start gap-2"
+          onClick={handleLogout}
+          disabled={logoutMutation.isPending}
+        >
+          <LogOut className="h-5 w-5" />
+          {!isSidebarCollapsed && (
+            <span>{logoutMutation.isPending ? 'Signing out...' : tCommon('signOut')}</span>
+          )}
+        </Button>
       </div>
     </aside>
   );
