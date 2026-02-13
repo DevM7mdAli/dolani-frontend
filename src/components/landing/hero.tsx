@@ -40,7 +40,7 @@ export function Hero() {
             >
               {tCommon('downloadApp')} <Download className="ml-2 h-5 w-5" />
             </Button>
-            <I18nLink href="/dashboard/doctors">
+            <I18nLink href="/signin">
               <Button
                 variant="outline"
                 size="lg"

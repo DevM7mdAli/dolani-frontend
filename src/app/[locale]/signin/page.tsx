@@ -143,7 +143,7 @@ export default function SignInPage(): JSX.Element {
             <CardFooter className="px-6 pb-6">
               <Button
                 type="submit"
-                className="h-11 w-full font-semibold"
+                className="mt-4 h-11 w-full font-semibold"
                 size="lg"
                 disabled={loginMutation.isPending}
               >

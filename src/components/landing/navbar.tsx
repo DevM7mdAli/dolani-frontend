@@ -57,7 +57,7 @@ export function LandingNavbar() {
           <Button variant="ghost" size="icon" onClick={toggleLanguage} aria-label="Toggle Language">
             <Globe className="text-primary h-5 w-5" />
           </Button>
-          <I18nLink href="/dashboard/doctors">
+          <I18nLink href="/signin">
             <Button variant="secondary" className="text-secondary-foreground font-semibold">
               {t('login')}
             </Button>
@@ -98,7 +98,7 @@ export function LandingNavbar() {
                   <Globe className="mr-2 h-4 w-4" />
                   Language
                 </Button>
-                <I18nLink href="/dashboard/doctors" className="w-full">
+                <I18nLink href="/signin" className="w-full">
                   <Button variant="secondary" size="sm" className="w-full">
                     {t('login')}
                   </Button>
