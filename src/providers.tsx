@@ -4,6 +4,7 @@ import { ReactNode, useState } from 'react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AbstractIntlMessages, NextIntlClientProvider } from 'next-intl';
+import { Toaster } from 'sonner';
 
 type Props = {
   children: ReactNode;
@@ -19,6 +20,10 @@ export function Providers({ children, locale, messages, timeZone }: Props) {
         defaultOptions: {
           queries: {
             staleTime: 60 * 1000, // 1 minute
+            retry: 1,
+          },
+          mutations: {
+            retry: false,
           },
         },
       }),
@@ -30,7 +35,15 @@ export function Providers({ children, locale, messages, timeZone }: Props) {
       messages={messages}
       timeZone={timeZone ?? 'Asia/Riyadh'}
     >
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <Toaster
+          position="top-center"
+          richColors
+          closeButton
+          dir={locale === 'ar' ? 'rtl' : 'ltr'}
+        />
+      </QueryClientProvider>
     </NextIntlClientProvider>
   );
 }
