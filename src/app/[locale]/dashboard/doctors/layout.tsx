@@ -2,6 +2,7 @@
 'use client';
 
 import { useLogout } from '@/hooks/useAuth';
+import { useRouter } from '@/i18n/routing';
 import { LogOut } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -10,10 +11,15 @@ import { Button } from '@/components/ui/button';
 export default function FacultyLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations('Faculty');
   const tCommon = useTranslations('Common');
+  const router = useRouter();
   const logoutMutation = useLogout();
 
   const handleLogout = () => {
-    logoutMutation.mutate();
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        router.push('/');
+      },
+    });
   };
 
   return (
