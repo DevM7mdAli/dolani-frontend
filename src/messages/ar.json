@@ -86,5 +86,47 @@
     "available": "متاح",
     "busy": "مشغول",
     "away": "غير موجود"
+  },
+  "MapEditor": {
+    "title": "محرر الخريطة",
+    "unsaved": "تغييرات غير محفوظة",
+    "properties": "الخصائص",
+    "noSelection": "انقر على عقدة أو حافة أو منارة لعرض خصائصها.",
+    "nodeProperties": "خصائص العقدة",
+    "edgeProperties": "خصائص المسار",
+    "beaconProperties": "خصائص المنارة",
+    "tools": {
+      "select": "تحديد",
+      "node": "إضافة عقدة",
+      "path": "رسم مسار",
+      "beacon": "وضع منارة",
+      "pan": "تحريك"
+    },
+    "zoomIn": "تكبير",
+    "zoomOut": "تصغير",
+    "delete": "حذف المحدد",
+    "reset": "إعادة تعيين الكل",
+    "save": "حفظ الرسم البياني",
+    "stats": {
+      "nodes": "العقد",
+      "edges": "المسارات",
+      "beacons": "المنارات",
+      "zoom": "التكبير"
+    },
+    "fields": {
+      "name": "الاسم",
+      "namePlaceholder": "مثال: غرفة 101",
+      "roomNumber": "رقم الغرفة",
+      "type": "النوع",
+      "navigable": "قابل للتنقل",
+      "navigableHelp": "تضمين في إيجاد المسار",
+      "distance": "المسافة (بكسل)",
+      "accessible": "متاح للجميع",
+      "accessibleHelp": "مسار مناسب للكراسي المتحركة",
+      "beaconName": "اسم المنارة",
+      "beaconUuid": "UUID المنارة",
+      "linkedNode": "العقدة المرتبطة",
+      "none": "— لا شيء —"
+    }
   }
 }
