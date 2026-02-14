@@ -1,0 +1,23 @@
+{
+  "i18n-ally.localesPaths": ["src/i18n", "src/messages"],
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#90dafb",
+    "activityBar.background": "#90dafb",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#f846c1",
+    "activityBarBadge.foreground": "#15202b",
+    "commandCenter.border": "#15202b99",
+    "sash.hoverBorder": "#90dafb",
+    "statusBar.background": "#5fcaf9",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#2ebaf7",
+    "statusBarItem.remoteBackground": "#5fcaf9",
+    "statusBarItem.remoteForeground": "#15202b",
+    "titleBar.activeBackground": "#5fcaf9",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#5fcaf999",
+    "titleBar.inactiveForeground": "#15202b99"
+  },
+  "peacock.color": "#5fcaf9"
+}

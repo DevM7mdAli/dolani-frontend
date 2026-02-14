@@ -1,0 +1,87 @@
+{
+  "Common": {
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "doctors": "Faculty",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "welcome": "Welcome to Dolani",
+    "downloadApp": "Download App",
+    "facultyPortal": "Faculty Portal"
+  },
+  "Landing": {
+    "nav": {
+      "features": "Features",
+      "technology": "Technology",
+      "team": "Team",
+      "contact": "Contact",
+      "login": "Faculty Login"
+    },
+    "hero": {
+      "headline": "Navigate CCSIT with Confidence.",
+      "subheadline": "Real-time indoor navigation, faculty availability, and emergency routing—all in one smart app."
+    },
+    "features": {
+      "title": "Why Dolani?",
+      "precisionTitle": "Precision Navigation",
+      "precisionDesc": "Turn-by-turn directions to any room with 1-meter accuracy using BLE Beacons.",
+      "facultyTitle": "Faculty Finder",
+      "facultyDesc": "Real-time status indicators. Know if your professor is Available, Busy, or Away.",
+      "searchTitle": "Smart Search",
+      "searchDesc": "Find labs, offices, and lecture halls instantly by name or code (e.g., 'A11-201').",
+      "emergencyTitle": "Emergency Mode",
+      "emergencyDesc": "Safety first. One-tap routing to the nearest safe exit, automatically avoiding elevators."
+    },
+    "how": {
+      "title": "How It Works",
+      "step1Title": "Detection",
+      "step1Desc": "Our app detects signals from BLE beacons installed every 8 meters.",
+      "step2Title": "Positioning",
+      "step2Desc": "We calculate your exact position using trilateration and advanced signal smoothing.",
+      "step3Title": "Routing",
+      "step3Desc": "The A* algorithm finds the shortest path to your destination instantly."
+    },
+    "tech": {
+      "tagline": "Built for reliability. Works even when campus Wi-Fi is unstable."
+    },
+    "team": {
+      "title": "Meet the Team",
+      "subtitle": "The minds behind Dolani - Group 06 CCSIT",
+      "member1": "Mohammed Ali",
+      "role1": "Frontend & Mobile",
+      "member2": "Ahmed Al-Saeed",
+      "role2": "Backend & Cloud",
+      "member3": "Khalid Al-Ghamdi",
+      "role3": "IoT & Hardware",
+      "member4": "Omar Al-Harbi",
+      "role4": "UI/UX Design"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "Do I need internet to use Dolani?",
+      "a1": "Yes, an internet connection is required to fetch real-time faculty status, but navigation data is cached for offline use.",
+      "q2": "What phones are supported?",
+      "a2": "Dolani works on any iOS or Android device with Bluetooth 4.0 (BLE) support.",
+      "q3": "Is my location data private?",
+      "a3": "Absolutely. Your location is calculated locally on your device and is never stored or sent to our servers.",
+      "q4": "How strict is the faculty availability?",
+      "a4": "Faculty members manage their status manually, but we also use office beacons to auto-update when they are in their office."
+    },
+    "footer": {
+      "copyright": "© 2026 Dolani Group 06. Imam Abdulrahman Bin Faisal University."
+    }
+  },
+  "Admin": {
+    "analytics": "Analytics",
+    "mapEditor": "Map Editor",
+    "rooms": "Rooms",
+    "faculty": "Faculty"
+  },
+  "Faculty": {
+    "status": "Status",
+    "schedule": "Schedule",
+    "available": "Available",
+    "busy": "Busy",
+    "away": "Away"
+  }
+}
