@@ -75,7 +75,10 @@
     "analytics": "Analytics",
     "mapEditor": "Map Editor",
     "rooms": "Rooms",
-    "faculty": "Faculty"
+    "faculty": "Faculty",
+    "beacons": "Beacons",
+    "reports": "Reports",
+    "settings": "Settings"
   },
   "Faculty": {
     "status": "Status",

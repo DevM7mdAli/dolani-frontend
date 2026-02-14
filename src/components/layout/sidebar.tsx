@@ -7,9 +7,12 @@ import {
   ChevronLeft,
   ChevronRight,
   DoorOpen,
+  FileText,
   LayoutDashboard,
   LogOut,
   Map,
+  Radio,
+  Settings,
   Users,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -39,16 +42,19 @@ export function Sidebar() {
     { href: '/dashboard/admin/map', label: t('mapEditor'), icon: Map },
     { href: '/dashboard/admin/rooms', label: t('rooms'), icon: DoorOpen },
     { href: '/dashboard/admin/doctors', label: t('faculty'), icon: Users },
+    { href: '/dashboard/admin/beacons', label: t('beacons'), icon: Radio },
+    { href: '/dashboard/admin/reports', label: t('reports'), icon: FileText },
+    { href: '/dashboard/admin/settings', label: t('settings'), icon: Settings },
   ];
 
   return (
     <aside
       className={cn(
-        'bg-card border-border flex h-screen flex-col border-r transition-all duration-300',
+        'bg-card border-border sticky top-0 flex min-h-screen flex-col border-r transition-all duration-300',
         isSidebarCollapsed ? 'w-16' : 'w-64',
       )}
     >
-      <div className="border-border flex items-center justify-between border-b p-4">
+      <div className="border-border flex h-14 items-center justify-between border-b px-4">
         {!isSidebarCollapsed && <h1 className="text-primary text-xl font-bold">Dolani</h1>}
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className="ml-auto">
           {isSidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
@@ -91,5 +97,28 @@ export function Sidebar() {
         </Button>
       </div>
     </aside>
+  );
+}
+
+const segmentKeys: Record<string, string> = {
+  admin: 'analytics',
+  map: 'mapEditor',
+  rooms: 'rooms',
+  doctors: 'faculty',
+  beacons: 'beacons',
+  reports: 'reports',
+  settings: 'settings',
+};
+
+export function AdminHeader() {
+  const t = useTranslations('Admin');
+  const segment = usePathname().split('/').pop() ?? 'admin';
+
+  return (
+    <header className="border-border flex h-14 items-center border-b bg-white px-6 shadow-sm">
+      <h2 className="text-primary text-lg font-semibold">
+        {t(segmentKeys[segment] ?? 'analytics')}
+      </h2>
+    </header>
   );
 }
