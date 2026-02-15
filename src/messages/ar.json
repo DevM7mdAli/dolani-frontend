@@ -82,10 +82,14 @@
   },
   "Faculty": {
     "status": "الحالة",
-    "schedule": "الجدول",
+    "schedule": "جدولي",
     "available": "متاح",
     "busy": "مشغول",
-    "away": "غير موجود"
+    "away": "غير موجود",
+    "myProfile": "ملفي الشخصي",
+    "officeHours": "ساعات المكتب",
+    "settings": "الإعدادات",
+    "title": "دولاني الأعضاء"
   },
   "MapEditor": {
     "title": "محرر الخريطة",

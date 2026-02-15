@@ -82,10 +82,14 @@
   },
   "Faculty": {
     "status": "Status",
-    "schedule": "Schedule",
+    "schedule": "My Schedule",
     "available": "Available",
     "busy": "Busy",
-    "away": "Away"
+    "away": "Away",
+    "myProfile": "My Profile",
+    "officeHours": "Office Hours",
+    "settings": "Settings",
+    "title": "Dolani Faculty"
   },
   "MapEditor": {
     "title": "Map Editor",
