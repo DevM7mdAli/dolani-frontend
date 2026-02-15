@@ -79,10 +79,9 @@ apiClient.interceptors.response.use(
         // Call refresh endpoint directly (bypass interceptor)
         const { data } = await axios.post(
           `${env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-          {},
+          { refresh_token: refreshToken },
           {
             headers: {
-              Authorization: `Bearer ${refreshToken}`,
               'Content-Type': 'application/json',
             },
           },
