@@ -1,0 +1,45 @@
+export type ProfessorStatus = 'AVAILABLE' | 'BUSY' | 'ON_LEAVE';
+
+export type DayOfWeek =
+  | 'SUNDAY'
+  | 'MONDAY'
+  | 'TUESDAY'
+  | 'WEDNESDAY'
+  | 'THURSDAY'
+  | 'FRIDAY'
+  | 'SATURDAY';
+
+export interface OfficeHours {
+  id: number;
+  day: DayOfWeek;
+  start_time: string;
+  end_time: string;
+}
+
+export interface Department {
+  id: number;
+  name: string;
+  name_ar?: string;
+  type: string;
+}
+
+export interface Office {
+  id: number;
+  name: string;
+  room_number: string | null;
+  type: string;
+}
+
+export interface Professor {
+  id: number;
+  full_name: string;
+  full_name_ar?: string;
+  email: string;
+  status: ProfessorStatus;
+  title?: string;
+  title_ar?: string;
+  user_id: number;
+  department: Department;
+  office: Office | null;
+  office_hours: OfficeHours[];
+}

@@ -18,6 +18,7 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 
+import { getInitials } from '@/lib/get-initials';
 import { cn } from '@/lib/utils';
 
 export function FacultySidebar() {
@@ -37,15 +38,7 @@ export function FacultySidebar() {
     });
   };
 
-  const initials = user?.name
-    ? user.name
-        .replace(/^(Dr\.|أ\.|د\.)\s*/i, '')
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase()
-    : '??';
+  const initials = user?.name ? getInitials(user.name) : '??';
 
   const links = [
     { href: '/dashboard/doctors/profile', label: t('myProfile'), icon: User },
