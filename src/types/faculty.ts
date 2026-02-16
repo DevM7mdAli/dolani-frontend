@@ -30,6 +30,18 @@ export interface Office {
   type: string;
 }
 
+export interface TeachingSlot {
+  id: number;
+  course_code: string;
+  course_name: string;
+  course_name_ar?: string;
+  day: DayOfWeek;
+  start_time: string;
+  end_time: string;
+  room: string;
+  student_count: number;
+}
+
 export interface Professor {
   id: number;
   full_name: string;
