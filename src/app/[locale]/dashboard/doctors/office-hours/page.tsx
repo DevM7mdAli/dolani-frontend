@@ -22,14 +22,14 @@ const allDays: DayOfWeek[] = [
   'SATURDAY',
 ];
 
-const dayLabels: Record<DayOfWeek, { en: string; ar: string }> = {
-  SUNDAY: { en: 'Sunday', ar: 'الأحد' },
-  MONDAY: { en: 'Monday', ar: 'الاثنين' },
-  TUESDAY: { en: 'Tuesday', ar: 'الثلاثاء' },
-  WEDNESDAY: { en: 'Wednesday', ar: 'الأربعاء' },
-  THURSDAY: { en: 'Thursday', ar: 'الخميس' },
-  FRIDAY: { en: 'Friday', ar: 'الجمعة' },
-  SATURDAY: { en: 'Saturday', ar: 'السبت' },
+const dayLabels: Record<DayOfWeek, string> = {
+  SUNDAY: 'Sunday',
+  MONDAY: 'Monday',
+  TUESDAY: 'Tuesday',
+  WEDNESDAY: 'Wednesday',
+  THURSDAY: 'Thursday',
+  FRIDAY: 'Friday',
+  SATURDAY: 'Saturday',
 };
 
 interface EditRow {
@@ -147,7 +147,7 @@ export default function OfficeHoursPage() {
                       <option value=""></option>
                       {allDays.map((d) => (
                         <option key={d} value={d}>
-                          {dayLabels[d].en}
+                          {dayLabels[d]}
                         </option>
                       ))}
                     </select>
@@ -232,7 +232,6 @@ export default function OfficeHoursPage() {
                 </div>
               ) : (
                 officeHours.map((oh) => {
-                  const day = dayLabels[oh.day];
                   return (
                     <div
                       key={oh.id}
@@ -243,13 +242,12 @@ export default function OfficeHoursPage() {
                           <Clock className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-semibold">{day.en}</p>
+                          <p className="font-semibold">{dayLabels[oh.day]}</p>
                           <p className="text-sm text-gray-500">
                             {oh.start_time} - {oh.end_time}
                           </p>
                         </div>
                       </div>
-                      <span className="text-sm text-gray-500">{day.ar}</span>
                     </div>
                   );
                 })
