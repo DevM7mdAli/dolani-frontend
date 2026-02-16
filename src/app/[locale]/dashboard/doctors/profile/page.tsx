@@ -43,54 +43,32 @@ export default function ProfilePage() {
           </div>
           <div>
             <p className="text-xl font-bold">{profile.full_name}</p>
-            <p className="text-muted-foreground mt-1 text-sm">{profile.full_name_ar ?? '—'}</p>
           </div>
         </div>
 
-        {/* Info Fields — 2 columns: English (left), Arabic (right) */}
+        {/* Info Fields — 2 columns */}
         <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
-          {/* Full Name (English) */}
+          {/* Full Name */}
           <div>
-            <label className="mb-2 block text-sm font-semibold">Full Name (English)</label>
+            <label className="mb-2 block text-sm font-semibold">Full Name</label>
             <div className="rounded-sm bg-sky-50 px-4 py-3 text-sm text-gray-700">
               {profile.full_name}
             </div>
           </div>
-          {/* Full Name (Arabic) */}
-          <div>
-            <label className="mb-2 block text-sm font-semibold">Full Name (Arabic)</label>
-            <div className="rounded-sm bg-sky-50 px-4 py-3 text-sm text-gray-700" dir="rtl">
-              {profile.full_name_ar ?? '—'}
-            </div>
-          </div>
 
-          {/* Title (English) */}
+          {/* Title */}
           <div>
-            <label className="mb-2 block text-sm font-semibold">Title (English)</label>
+            <label className="mb-2 block text-sm font-semibold">Title</label>
             <div className="rounded-sm bg-sky-50 px-4 py-3 text-sm text-gray-700">
               {profile.title ?? '—'}
             </div>
           </div>
-          {/* Title (Arabic) */}
-          <div>
-            <label className="mb-2 block text-sm font-semibold">Title (Arabic)</label>
-            <div className="rounded-sm bg-sky-50 px-4 py-3 text-sm text-gray-700" dir="rtl">
-              {profile.title_ar ?? '—'}
-            </div>
-          </div>
 
-          {/* Department (English) */}
+          {/* Department */}
           <div>
-            <label className="mb-2 block text-sm font-semibold">Department (English)</label>
+            <label className="mb-2 block text-sm font-semibold">Department</label>
             <div className="rounded-sm bg-sky-50 px-4 py-3 text-sm text-gray-700">
               {profile.department?.name ?? '—'}
-            </div>
-          </div>
-          {/* Department (Arabic) */}
-          <div>
-            <label className="mb-2 block text-sm font-semibold">Department (Arabic)</label>
-            <div className="rounded-sm bg-sky-50 px-4 py-3 text-sm text-gray-700" dir="rtl">
-              {profile.department?.name_ar ?? '—'}
             </div>
           </div>
 
@@ -101,11 +79,20 @@ export default function ProfilePage() {
               {profile.email}
             </div>
           </div>
+
           {/* Office Room */}
           <div>
             <label className="mb-2 block text-sm font-semibold">Office Room</label>
             <div className="rounded-sm bg-sky-50 px-4 py-3 text-sm text-gray-700">
               {profile.office?.room_number ?? profile.office?.name ?? '—'}
+            </div>
+          </div>
+
+          {/* Status */}
+          <div>
+            <label className="mb-2 block text-sm font-semibold">Status</label>
+            <div className="rounded-sm bg-sky-50 px-4 py-3 text-sm text-gray-700">
+              {profile.status}
             </div>
           </div>
         </div>
