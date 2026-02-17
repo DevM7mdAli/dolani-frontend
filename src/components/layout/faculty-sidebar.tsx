@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  FileText,
   LogOut,
   Settings,
   User,
@@ -44,6 +45,7 @@ export function FacultySidebar() {
     { href: '/dashboard/doctors/profile', label: t('myProfile'), icon: User },
     { href: '/dashboard/doctors/office-hours', label: t('officeHours'), icon: Clock },
     { href: '/dashboard/doctors/schedule', label: t('schedule'), icon: Calendar },
+    { href: '/dashboard/doctors/reports', label: t('reports'), icon: FileText },
     { href: '/dashboard/doctors/settings', label: t('settings'), icon: Settings },
   ];
 
@@ -142,6 +144,7 @@ const segmentKeys: Record<string, string> = {
   profile: 'myProfile',
   'office-hours': 'officeHours',
   schedule: 'schedule',
+  reports: 'reports',
   settings: 'settings',
 };
 

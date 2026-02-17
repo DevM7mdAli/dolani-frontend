@@ -55,3 +55,18 @@ export interface Professor {
   office: Office | null;
   office_hours: OfficeHours[];
 }
+
+export type ReportStatus = 'PENDING' | 'IN_PROGRESS' | 'RESOLVED';
+
+export type ReportCategory = 'MAINTENANCE' | 'EQUIPMENT' | 'SAFETY' | 'CLEANLINESS' | 'OTHER';
+
+export interface Report {
+  id: number;
+  title: string;
+  description: string;
+  category: ReportCategory;
+  status: ReportStatus;
+  room: string;
+  created_at: string;
+  resolved_at?: string;
+}
