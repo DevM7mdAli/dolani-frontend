@@ -75,7 +75,28 @@
     "analytics": "الإحصائيات",
     "mapEditor": "محرر الخريطة",
     "rooms": "القاعات",
-    "faculty": "أعضاء هيئة التدريس"
+    "faculty": "أعضاء هيئة التدريس",
+    "beacons": "المنارات",
+    "reports": "التقارير",
+    "settings": "الإعدادات"
+  },
+  "LocationTypes": {
+    "CLASSROOM": "محاضرات",
+    "OFFICE": "مكتب",
+    "LAB": "معمل",
+    "CONFERENCE": "اجتماعات",
+    "THEATER": "قاعة",
+    "CORRIDOR": "ممر",
+    "EXIT": "خروج",
+    "ELEVATOR": "مصعد",
+    "MAIN_HALL": "قاعة رئيسية",
+    "RESTROOM": "دورات مياه",
+    "STAIRS": "سلالم",
+    "SERVICE": "خدمة",
+    "PRAYER_ROOM": "غرفة الصلاة",
+    "SERVER_ROOM": "غرفة الخادم",
+    "STORE_ROOM": "مستودع",
+    "LOCKERS": "خزانات"
   },
   "Faculty": {
     "status": "الحالة",

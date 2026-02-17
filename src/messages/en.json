@@ -75,7 +75,28 @@
     "analytics": "Analytics",
     "mapEditor": "Map Editor",
     "rooms": "Rooms",
-    "faculty": "Faculty"
+    "faculty": "Faculty",
+    "beacons": "Beacons",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "LocationTypes": {
+    "CLASSROOM": "Classroom",
+    "OFFICE": "Office",
+    "LAB": "Laboratory",
+    "CONFERENCE": "Conference",
+    "THEATER": "Theater",
+    "CORRIDOR": "Corridor",
+    "EXIT": "Exit",
+    "ELEVATOR": "Elevator",
+    "MAIN_HALL": "Main Hall",
+    "RESTROOM": "Restroom",
+    "STAIRS": "Stairs",
+    "SERVICE": "Service",
+    "PRAYER_ROOM": "Prayer Room",
+    "SERVER_ROOM": "Server Room",
+    "STORE_ROOM": "Store Room",
+    "LOCKERS": "Lockers"
   },
   "Faculty": {
     "status": "Status",
