@@ -9,18 +9,17 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 import { facultyApi } from '@/lib/api/faculty';
 
-const allDays: DayOfWeek[] = [
-  'SUNDAY',
-  'MONDAY',
-  'TUESDAY',
-  'WEDNESDAY',
-  'THURSDAY',
-  'FRIDAY',
-  'SATURDAY',
-];
+const allDays: DayOfWeek[] = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY'];
 
 const dayLabels: Record<DayOfWeek, string> = {
   SUNDAY: 'Sunday',
@@ -28,14 +27,20 @@ const dayLabels: Record<DayOfWeek, string> = {
   TUESDAY: 'Tuesday',
   WEDNESDAY: 'Wednesday',
   THURSDAY: 'Thursday',
-  FRIDAY: 'Friday',
-  SATURDAY: 'Saturday',
 };
 
 interface EditRow {
   day: DayOfWeek | '';
   start_time: string;
   end_time: string;
+}
+
+/** Convert HH:MM (24h) → h:MM AM/PM for display */
+function formatTime(time: string): string {
+  const [h, m] = time.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${period}`;
 }
 
 export default function OfficeHoursPage() {
@@ -51,6 +56,12 @@ export default function OfficeHoursPage() {
   const { mutate: saveOfficeHours, isPending: isSaving } = useMutation({
     mutationFn: (rows: EditRow[]) => {
       const valid = rows.filter((r) => r.day && r.start_time && r.end_time);
+      // If there are rows but none are complete, warn user
+      if (rows.length > 0 && valid.length === 0) {
+        toast.error('Please complete the office hour fields or remove incomplete rows');
+        return Promise.reject(new Error('Incomplete rows'));
+      }
+      // valid can be empty (clearing all hours) — backend allows it now
       return facultyApi.updateOfficeHours(
         valid.map((r) => ({
           day: r.day as string,
@@ -64,8 +75,10 @@ export default function OfficeHoursPage() {
       setIsEditing(false);
       toast.success('Office hours updated successfully');
     },
-    onError: () => {
-      toast.error('Failed to update office hours');
+    onError: (err) => {
+      if ((err as Error).message !== 'Incomplete rows') {
+        toast.error('Failed to update office hours');
+      }
     },
   });
 
@@ -95,6 +108,10 @@ export default function OfficeHoursPage() {
   const addRow = () => {
     setEditRows((prev) => [...prev, { day: '', start_time: '', end_time: '' }]);
   };
+
+  // Disable save only when rows exist but ALL are incomplete
+  const hasValidRows =
+    editRows.length === 0 || editRows.some((r) => r.day && r.start_time && r.end_time);
 
   if (isLoading) {
     return (
@@ -139,18 +156,18 @@ export default function OfficeHoursPage() {
                   {/* Day */}
                   <div className="flex-1">
                     <label className="mb-1.5 block text-xs font-semibold text-gray-600">Day</label>
-                    <select
-                      value={row.day}
-                      onChange={(e) => updateRow(index, 'day', e.target.value)}
-                      className="focus:border-primary focus:ring-primary/30 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none focus:ring-1"
-                    >
-                      <option value=""></option>
-                      {allDays.map((d) => (
-                        <option key={d} value={d}>
-                          {dayLabels[d]}
-                        </option>
-                      ))}
-                    </select>
+                    <Select value={row.day} onValueChange={(val) => updateRow(index, 'day', val)}>
+                      <SelectTrigger className="h-10 w-full rounded-lg border border-gray-200 bg-white text-sm">
+                        <SelectValue placeholder="Select day" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allDays.map((d) => (
+                          <SelectItem key={d} value={d}>
+                            {dayLabels[d]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Start Time */}
@@ -216,7 +233,8 @@ export default function OfficeHoursPage() {
                   size="sm"
                   className="gap-1.5 bg-amber-400 text-white hover:bg-amber-500"
                   onClick={() => saveOfficeHours(editRows)}
-                  disabled={isSaving}
+                  disabled={isSaving || !hasValidRows}
+                  title={!hasValidRows ? 'Add at least one complete office hour' : undefined}
                 >
                   <Save className="h-4 w-4" />
                   {isSaving ? 'Saving...' : 'Save Changes'}
@@ -238,13 +256,13 @@ export default function OfficeHoursPage() {
                       className="flex items-center justify-between rounded-lg bg-sky-50 px-5 py-4"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="bg-primary text-primary-foreground flex h-10 w-10 shrink-0 items-center justify-center">
+                        <div className="bg-primary text-primary-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-md">
                           <Clock className="h-5 w-5" />
                         </div>
                         <div>
                           <p className="font-semibold">{dayLabels[oh.day]}</p>
                           <p className="text-sm text-gray-500">
-                            {oh.start_time} - {oh.end_time}
+                            {formatTime(oh.start_time)} – {formatTime(oh.end_time)}
                           </p>
                         </div>
                       </div>

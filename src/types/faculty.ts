@@ -1,13 +1,6 @@
 export type ProfessorStatus = 'AVAILABLE' | 'NOT_AVAILABLE';
 
-export type DayOfWeek =
-  | 'SUNDAY'
-  | 'MONDAY'
-  | 'TUESDAY'
-  | 'WEDNESDAY'
-  | 'THURSDAY'
-  | 'FRIDAY'
-  | 'SATURDAY';
+export type DayOfWeek = 'SUNDAY' | 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY';
 
 export interface OfficeHours {
   id: number;
