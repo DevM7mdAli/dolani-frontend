@@ -6,7 +6,6 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useUIStore } from '@/store/useUIStore';
 import {
   Calendar,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock,
@@ -17,10 +16,16 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+import { facultyApi } from '@/lib/api/faculty';
 import { getInitials } from '@/lib/get-initials';
 import { cn } from '@/lib/utils';
+
+import type { ProfessorStatus } from '@/types/faculty';
 
 export function FacultySidebar() {
   const t = useTranslations('Faculty');
@@ -30,6 +35,21 @@ export function FacultySidebar() {
   const pathname = usePathname();
   const logoutMutation = useLogout();
   const user = useAuthStore((s) => s.user);
+  const queryClient = useQueryClient();
+
+  // Fetch real professor profile to get status
+  const { data: profile } = useQuery({
+    queryKey: ['faculty', 'profile'],
+    queryFn: facultyApi.getMyProfile,
+  });
+
+  // Mutation to update status
+  const statusMutation = useMutation({
+    mutationFn: (status: ProfessorStatus) => facultyApi.updateStatus(status),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(['faculty', 'profile'], updated);
+    },
+  });
 
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
@@ -40,6 +60,8 @@ export function FacultySidebar() {
   };
 
   const initials = user?.name ? getInitials(user.name) : '??';
+  const status = profile?.status ?? 'AVAILABLE';
+  const isAvailable = status === 'AVAILABLE';
 
   const links = [
     { href: '/dashboard/doctors/profile', label: t('myProfile'), icon: User },
@@ -78,14 +100,34 @@ export function FacultySidebar() {
               </p>
             </div>
           </div>
-          {/* Status Dropdown */}
-          <button className="flex w-full items-center justify-between rounded-md bg-green-100 px-3 py-1.5 text-sm font-medium text-green-700">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-green-500" />
-              {t('available')}
-            </div>
-            <ChevronDown className="h-4 w-4" />
-          </button>
+
+          {/* Status Select */}
+          <Select
+            value={status}
+            onValueChange={(val) => statusMutation.mutate(val as ProfessorStatus)}
+            disabled={statusMutation.isPending}
+          >
+            <SelectTrigger
+              className={cn(
+                'w-full text-sm font-medium',
+                isAvailable
+                  ? 'border-green-200 bg-green-50 text-green-700'
+                  : 'border-red-200 bg-red-50 text-red-700',
+              )}
+            >
+              <span
+                className={cn(
+                  'mr-2 inline-block h-2 w-2 rounded-full',
+                  isAvailable ? 'bg-green-500' : 'bg-red-500',
+                )}
+              />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="AVAILABLE">{t('available')}</SelectItem>
+              <SelectItem value="NOT_AVAILABLE">{t('notAvailable')}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       )}
 
@@ -152,14 +194,34 @@ export function FacultyHeader() {
   const t = useTranslations('Faculty');
   const segment = usePathname().split('/').pop() ?? 'profile';
 
+  // Re-use the cached profile query — no extra network call
+  const { data: profile } = useQuery({
+    queryKey: ['faculty', 'profile'],
+    queryFn: facultyApi.getMyProfile,
+  });
+
+  const status = profile?.status ?? 'AVAILABLE';
+  const isAvailable = status === 'AVAILABLE';
+
   return (
     <header className="border-border flex h-14 items-center justify-between border-b bg-white px-6 shadow-sm">
       <h2 className="text-primary text-lg font-semibold">
         {t(segmentKeys[segment] ?? 'myProfile')}
       </h2>
-      <div className="flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
-        <span className="h-2 w-2 rounded-full bg-green-500" />
-        {t('available')}
+      {/* Read-only status badge — change status via the sidebar */}
+      <div
+        className={cn(
+          'flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium',
+          isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700',
+        )}
+      >
+        <span
+          className={cn(
+            'h-2 w-2 rounded-full',
+            isAvailable ? 'bg-green-500' : 'bg-red-500',
+          )}
+        />
+        {t(isAvailable ? 'available' : 'notAvailable')}
       </div>
     </header>
   );

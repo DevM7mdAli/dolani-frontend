@@ -84,6 +84,7 @@
     "status": "Status",
     "schedule": "My Schedule",
     "available": "Available",
+    "notAvailable": "Not Available",
     "busy": "Busy",
     "away": "Away",
     "myProfile": "My Profile",
