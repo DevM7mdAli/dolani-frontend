@@ -56,7 +56,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Title */}
+          {/* Title — field not in DB schema yet, will always show '—' until added */}
           <div>
             <label className="mb-2 block text-sm font-semibold">Title</label>
             <div className="rounded-sm bg-sky-50 px-4 py-3 text-sm text-gray-700">

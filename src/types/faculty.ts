@@ -45,11 +45,10 @@ export interface TeachingSlot {
 export interface Professor {
   id: number;
   full_name: string;
-  full_name_ar?: string;
   email: string;
   status: ProfessorStatus;
   title?: string;
-  title_ar?: string;
+  phone_number: string | null;
   user_id: number;
   department: Department;
   office: Office | null;
