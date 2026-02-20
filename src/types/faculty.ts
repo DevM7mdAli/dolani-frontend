@@ -1,4 +1,4 @@
-export type ProfessorStatus = 'AVAILABLE' | 'BUSY' | 'ON_LEAVE';
+export type ProfessorStatus = 'AVAILABLE' | 'NOT_AVAILABLE';
 
 export type DayOfWeek =
   | 'SUNDAY'
