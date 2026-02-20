@@ -2,7 +2,7 @@
 
 import { type ReactNode, useState } from 'react';
 
-import { Check, Globe, Moon, Sun, Zap } from 'lucide-react';
+import { Check, Globe, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -92,7 +92,6 @@ function ToggleRow({
 
 export default function SettingsPage() {
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [autoAvailable, setAutoAvailable] = useState(true);
   const [autoBusy, setAutoBusy] = useState(false);
 
@@ -115,28 +114,6 @@ export default function SettingsPage() {
               selected={language === 'ar'}
               onClick={() => setLanguage('ar')}
               label="العربية"
-            />
-          </div>
-        </SettingsSection>
-
-        {/* Theme */}
-        <SettingsSection
-          icon={theme === 'light' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          title="Theme"
-          description="Select your preferred appearance"
-        >
-          <div className="flex gap-3">
-            <OptionButton
-              selected={theme === 'light'}
-              onClick={() => setTheme('light')}
-              icon={<Sun className="h-4 w-4" />}
-              label="Light"
-            />
-            <OptionButton
-              selected={theme === 'dark'}
-              onClick={() => setTheme('dark')}
-              icon={<Moon className="h-4 w-4" />}
-              label="Dark"
             />
           </div>
         </SettingsSection>
