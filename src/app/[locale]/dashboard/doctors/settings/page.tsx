@@ -2,7 +2,9 @@
 
 import { type ReactNode, useState } from 'react';
 
+import { usePathname, useRouter } from '@/i18n/routing';
 import { Check, Globe, Zap } from 'lucide-react';
+import { useLocale } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -91,9 +93,15 @@ function ToggleRow({
 }
 
 export default function SettingsPage() {
-  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const router = useRouter();
+  const pathname = usePathname();
+  const locale = useLocale();
   const [autoAvailable, setAutoAvailable] = useState(true);
   const [autoBusy, setAutoBusy] = useState(false);
+
+  const switchLocale = (newLocale: 'en' | 'ar') => {
+    router.replace(pathname, { locale: newLocale });
+  };
 
   return (
     <div className="flex justify-center pt-10">
@@ -106,13 +114,13 @@ export default function SettingsPage() {
         >
           <div className="flex gap-3">
             <OptionButton
-              selected={language === 'en'}
-              onClick={() => setLanguage('en')}
+              selected={locale === 'en'}
+              onClick={() => switchLocale('en')}
               label="English"
             />
             <OptionButton
-              selected={language === 'ar'}
-              onClick={() => setLanguage('ar')}
+              selected={locale === 'ar'}
+              onClick={() => switchLocale('ar')}
               label="العربية"
             />
           </div>
