@@ -1,21 +1,19 @@
 'use client';
 
+import type { LandingPage } from '@/payload-types';
 import { Code, Cpu, Palette, Server } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useTranslations } from 'next-intl';
 
 import { Card, CardContent } from '@/components/ui/card';
 
-export function TeamSection() {
-  const t = useTranslations('Landing.team');
+const iconMap = {
+  Code,
+  Server,
+  Cpu,
+  Palette,
+};
 
-  const members = [
-    { id: 'member1', name: t('member1'), role: t('role1'), icon: Code },
-    { id: 'member2', name: t('member2'), role: t('role2'), icon: Server },
-    { id: 'member3', name: t('member3'), role: t('role3'), icon: Cpu },
-    { id: 'member4', name: t('member4'), role: t('role4'), icon: Palette },
-  ];
-
+export function TeamSection({ data }: { data: LandingPage['team'] }) {
   return (
     <section id="team" className="relative overflow-hidden bg-slate-50 py-24">
       <div className="container mx-auto px-6">
@@ -26,15 +24,15 @@ export function TeamSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-primary mb-4 text-3xl font-bold">{t('title')}</h2>
+            <h2 className="text-primary mb-4 text-3xl font-bold">{data.title}</h2>
             <div className="bg-secondary mx-auto mb-6 h-1 w-16 rounded-full"></div>
-            <p className="mx-auto max-w-2xl text-slate-600">{t('subtitle')}</p>
+            <p className="mx-auto max-w-2xl text-slate-600">{data.subtitle}</p>
           </motion.div>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {members.map((member, index) => {
-            const Icon = member.icon;
+          {data.members?.map((member, index) => {
+            const Icon = iconMap[member.icon as keyof typeof iconMap] || Code;
             return (
               <motion.div
                 key={member.id}

@@ -39,59 +39,59 @@
 :root {
   /* Base */
   --background: #ffffff;
-  --foreground: #0a4d5c;
+  --foreground: #114b5f;
 
   /* Surfaces */
-  --card: #e8f4f8;
-  --card-foreground: #0a4d5c;
+  --card: #f4f9fa;
+  --card-foreground: #114b5f;
 
   --popover: #ffffff;
-  --popover-foreground: #0a4d5c;
+  --popover-foreground: #114b5f;
 
   /* Brand */
-  --primary: #008080;
+  --primary: #114b5f;
   --primary-foreground: #ffffff;
 
   /* Secondary (Yellow) */
-  --secondary: #ffd700;
-  --secondary-foreground: #004d4d;
+  --secondary: #fdb913;
+  --secondary-foreground: #114b5f;
 
   /* Muted */
-  --muted: #e8f4f8;
-  --muted-foreground: #3b6f7b;
+  --muted: #f4f9fa;
+  --muted-foreground: #64748b;
 
   /* Accent (Soft Teal for hover effects) */
-  --accent: #e8f4f8;
-  --accent-foreground: #0a4d5c;
+  --accent: #e0f2fe;
+  --accent-foreground: #114b5f;
 
   /* System */
   --destructive: #dc2626;
-  --border: #d6e6ec;
-  --input: #d6e6ec;
-  --ring: #0a4d5c;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #114b5f;
 }
 
 .dark {
-  --background: #0a4d5c;
+  --background: #114b5f;
   --foreground: #ffffff;
 
-  --card: #083b46;
+  --card: #0f3741;
   --card-foreground: #ffffff;
 
-  --popover: #083b46;
+  --popover: #0f3741;
   --popover-foreground: #ffffff;
 
   --primary: #ffffff;
-  --primary-foreground: #0a4d5c;
+  --primary-foreground: #114b5f;
 
-  --secondary: #124f5d;
-  --secondary-foreground: #ffffff;
+  --secondary: #fdb913;
+  --secondary-foreground: #114b5f;
 
-  --muted: #124f5d;
-  --muted-foreground: #b6d8e2;
+  --muted: #0f3741;
+  --muted-foreground: #94a3b8;
 
   --accent: #fdb913;
-  --accent-foreground: #0a4d5c;
+  --accent-foreground: #114b5f;
 
   --destructive: #ef4444;
   --border: #1e6a7b;

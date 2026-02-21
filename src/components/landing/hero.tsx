@@ -1,16 +1,14 @@
 'use client';
 
 import { Link as I18nLink } from '@/i18n/routing';
+import type { LandingPage } from '@/payload-types';
 import { ArrowLeft, ArrowRight, Download } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 
-export function Hero() {
-  const t = useTranslations('Landing.hero');
-  const tCommon = useTranslations('Common');
+export function Hero({ data }: { data: LandingPage['hero'] }) {
   const locale = useLocale();
   const isRtl = locale === 'ar';
 
@@ -27,10 +25,10 @@ export function Hero() {
           className="text-center md:text-start"
         >
           <h1 className="mb-6 text-4xl leading-tight font-extrabold text-[#003B46] md:text-6xl">
-            {t('headline')}
+            {data.headline} <span className="text-secondary">{data.headlineHighlight}</span>
           </h1>
           <p className="text-muted-foreground mx-auto mb-8 max-w-lg text-lg leading-relaxed md:mx-0 md:text-xl">
-            {t('subheadline')}
+            {data.subheadline}
           </p>
 
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row md:justify-start">
@@ -38,7 +36,7 @@ export function Hero() {
               size="lg"
               className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-secondary/20 h-12 w-full px-8 text-lg font-bold shadow-lg transition-transform duration-200 hover:scale-105 sm:w-auto"
             >
-              {tCommon('downloadApp')} <Download className="ml-2 h-5 w-5" />
+              {data.downloadApp} <Download className="ml-2 h-5 w-5" />
             </Button>
             <I18nLink href="/signin">
               <Button
@@ -46,7 +44,7 @@ export function Hero() {
                 size="lg"
                 className="border-primary text-primary hover:bg-primary/5 h-12 w-full px-8 text-lg font-semibold sm:w-auto"
               >
-                {tCommon('facultyPortal')} <ArrowIcon className="ml-2 h-5 w-5" />
+                {data.watchDemo} <ArrowIcon className="ml-2 h-5 w-5" />
               </Button>
             </I18nLink>
           </div>
