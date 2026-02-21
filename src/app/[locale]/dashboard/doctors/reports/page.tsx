@@ -7,19 +7,22 @@ import {
   AlertTriangle,
   Calendar,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   ChevronUp,
+  DoorOpen,
   FileText,
   HelpCircle,
+  Lightbulb,
   MapPin,
+  Monitor,
+  Plug,
   Plus,
+  Printer,
   Send,
-  ShieldAlert,
+  Shield,
+  Snowflake,
   Sparkles,
-  Wrench,
+  Tv,
   X,
-  Zap,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -34,17 +37,17 @@ const mockReports: Report[] = [
     title: 'Projector not working',
     description:
       'The ceiling-mounted projector in Room A11-201 has stopped displaying. The lamp turns on but shows a blank blue screen. Tried multiple HDMI cables.',
-    category: 'EQUIPMENT',
+    category: 'PROJECTOR',
     status: 'PENDING',
     room: 'A11-201',
     created_at: '2026-02-15T10:30:00Z',
   },
   {
     id: 2,
-    title: 'Air conditioning malfunction',
+    title: 'AC blowing warm air',
     description:
       'The AC unit in my office has been blowing warm air for the past 3 days. Temperature is uncomfortable for office hours.',
-    category: 'MAINTENANCE',
+    category: 'AC',
     status: 'IN_PROGRESS',
     room: 'A11-305',
     created_at: '2026-02-12T08:15:00Z',
@@ -54,7 +57,7 @@ const mockReports: Report[] = [
     title: 'Broken door lock',
     description:
       'The electronic card reader on Lab B-102 is not recognizing faculty key cards. Had to prop the door open during class.',
-    category: 'SAFETY',
+    category: 'DOOR',
     status: 'RESOLVED',
     room: 'B-102',
     created_at: '2026-02-05T14:00:00Z',
@@ -62,41 +65,42 @@ const mockReports: Report[] = [
   },
   {
     id: 4,
-    title: 'Water leak near whiteboard',
+    title: 'Broken power outlet',
     description:
-      'There is a slow water leak from the ceiling tiles near the front whiteboard. The floor gets slippery and it may damage equipment.',
-    category: 'MAINTENANCE',
+      'Two of the power outlets near the front desk are not working. Students cannot charge their laptops.',
+    category: 'PLUG',
     status: 'PENDING',
     room: 'A11-108',
     created_at: '2026-02-16T09:45:00Z',
   },
 ];
 
-/* ── Helpers ── */
-const categoryLabels: Record<ReportCategory, string> = {
-  MAINTENANCE: 'Maintenance',
-  EQUIPMENT: 'Equipment',
-  SAFETY: 'Safety',
-  CLEANLINESS: 'Cleanliness',
-  OTHER: 'Other',
-};
+/* ── Category config ── */
+type CategoryGroup = { label: string; items: ReportCategory[] };
 
-const categoryIcons: Record<ReportCategory, React.ReactNode> = {
-  MAINTENANCE: <Wrench className="h-3.5 w-3.5" />,
-  EQUIPMENT: <Zap className="h-3.5 w-3.5" />,
-  SAFETY: <ShieldAlert className="h-3.5 w-3.5" />,
-  CLEANLINESS: <Sparkles className="h-3.5 w-3.5" />,
-  OTHER: <HelpCircle className="h-3.5 w-3.5" />,
+const categoryGroups: CategoryGroup[] = [
+  { label: 'Tech', items: ['PROJECTOR', 'SMART_BOARD', 'COMPUTER', 'PRINTER'] },
+  { label: 'Facility', items: ['AC', 'LIGHT', 'DOOR', 'PLUG'] },
+  { label: 'General', items: ['CLEANLINESS', 'SAFETY', 'OTHER'] },
+];
+
+const categoryMeta: Record<ReportCategory, { label: string; icon: React.ReactNode }> = {
+  PROJECTOR: { label: 'Projector', icon: <Tv className="h-3.5 w-3.5" /> },
+  SMART_BOARD: { label: 'Smart Board', icon: <Monitor className="h-3.5 w-3.5" /> },
+  COMPUTER: { label: 'Computer', icon: <Monitor className="h-3.5 w-3.5" /> },
+  PRINTER: { label: 'Printer', icon: <Printer className="h-3.5 w-3.5" /> },
+  AC: { label: 'AC', icon: <Snowflake className="h-3.5 w-3.5" /> },
+  LIGHT: { label: 'Light', icon: <Lightbulb className="h-3.5 w-3.5" /> },
+  DOOR: { label: 'Door', icon: <DoorOpen className="h-3.5 w-3.5" /> },
+  PLUG: { label: 'Power Outlet', icon: <Plug className="h-3.5 w-3.5" /> },
+  CLEANLINESS: { label: 'Cleanliness', icon: <Sparkles className="h-3.5 w-3.5" /> },
+  SAFETY: { label: 'Safety', icon: <Shield className="h-3.5 w-3.5" /> },
+  OTHER: { label: 'Other', icon: <HelpCircle className="h-3.5 w-3.5" /> },
 };
 
 const statusConfig: Record<ReportStatus, { label: string; bg: string; text: string; dot: string }> =
   {
-    PENDING: {
-      label: 'Pending',
-      bg: 'bg-amber-100',
-      text: 'text-amber-700',
-      dot: 'bg-amber-500',
-    },
+    PENDING: { label: 'Pending', bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
     IN_PROGRESS: {
       label: 'In Progress',
       bg: 'bg-blue-100',
@@ -122,17 +126,11 @@ function formatDate(iso: string) {
 /* ── New Report Form ── */
 function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit: () => void }) {
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<ReportCategory>('MAINTENANCE');
+  const [category, setCategory] = useState<ReportCategory>('PROJECTOR');
   const [room, setRoom] = useState('');
   const [description, setDescription] = useState('');
 
   const canSubmit = title.trim() && room.trim() && description.trim();
-
-  const handleSubmit = () => {
-    if (!canSubmit) return;
-    // TODO: Call API when backend is ready
-    onSubmit();
-  };
 
   return (
     <Card className="bg-white p-6">
@@ -141,7 +139,7 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
         <h3 className="text-lg font-bold">New Report</h3>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {/* Title */}
         <div>
           <Label htmlFor="report-title" className="mb-1.5 block text-sm font-medium">
@@ -155,24 +153,37 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
           />
         </div>
 
-        {/* Category */}
+        {/* Category — grouped */}
         <div>
-          <Label className="mb-1.5 block text-sm font-medium">Category</Label>
-          <div className="flex flex-wrap gap-2">
-            {(Object.keys(categoryLabels) as ReportCategory[]).map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setCategory(cat)}
-                className={`flex items-center gap-1.5 rounded-md border-2 px-3 py-1.5 text-sm font-medium transition-colors ${
-                  category === cat
-                    ? 'border-primary bg-primary/5 text-primary'
-                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                }`}
-              >
-                {categoryIcons[cat]}
-                {categoryLabels[cat]}
-              </button>
+          <Label className="mb-2 block text-sm font-medium">Category</Label>
+          <div className="space-y-3">
+            {categoryGroups.map((group) => (
+              <div key={group.label}>
+                <p className="mb-1.5 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+                  {group.label}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {group.items.map((cat) => {
+                    const meta = categoryMeta[cat];
+                    const selected = category === cat;
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setCategory(cat)}
+                        className={`flex items-center gap-1.5 rounded-md border-2 px-3 py-1.5 text-sm font-medium transition-colors ${
+                          selected
+                            ? 'border-primary bg-primary/5 text-primary'
+                            : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                        }`}
+                      >
+                        {meta.icon}
+                        {meta.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -206,7 +217,7 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pt-2">
+        <div className="flex items-center justify-end gap-3 pt-1">
           <Button variant="outline" onClick={onCancel}>
             <X className="mr-1.5 h-4 w-4" />
             Cancel
@@ -214,7 +225,9 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
           <Button
             className="bg-amber-500 text-white hover:bg-amber-600"
             disabled={!canSubmit}
-            onClick={handleSubmit}
+            onClick={() => {
+              if (canSubmit) onSubmit();
+            }}
           >
             <Send className="mr-1.5 h-4 w-4" />
             Submit Report
@@ -229,6 +242,7 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
 function ReportCard({ report }: { report: Report }) {
   const [expanded, setExpanded] = useState(false);
   const status = statusConfig[report.status];
+  const meta = categoryMeta[report.category];
 
   return (
     <Card className="bg-white p-5 transition-shadow hover:shadow-md">
@@ -237,10 +251,9 @@ function ReportCard({ report }: { report: Report }) {
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="font-semibold">{report.title}</h4>
-            {/* Category badge */}
-            <span className="inline-flex items-center gap-1 rounded-full bg-teal-100 px-2.5 py-0.5 text-xs font-medium text-teal-700">
-              {categoryIcons[report.category]}
-              {categoryLabels[report.category]}
+            <span className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-700">
+              {meta.icon}
+              {meta.label}
             </span>
           </div>
 
@@ -255,7 +268,6 @@ function ReportCard({ report }: { report: Report }) {
             </span>
           </div>
 
-          {/* Expandable description */}
           {expanded && <p className="mt-1 text-sm text-gray-600">{report.description}</p>}
           {report.status === 'RESOLVED' && report.resolved_at && expanded && (
             <p className="text-xs text-green-600">Resolved on {formatDate(report.resolved_at)}</p>
@@ -284,18 +296,9 @@ function ReportCard({ report }: { report: Report }) {
 }
 
 /* ── Page ── */
-const REPORTS_PER_PAGE = 5;
-
 export default function ReportsPage() {
   const [showForm, setShowForm] = useState(false);
   const [reports] = useState<Report[]>(mockReports);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const totalPages = Math.ceil(reports.length / REPORTS_PER_PAGE);
-  const paginatedReports = reports.slice(
-    (currentPage - 1) * REPORTS_PER_PAGE,
-    currentPage * REPORTS_PER_PAGE,
-  );
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
@@ -333,57 +336,11 @@ export default function ReportsPage() {
           </p>
         </Card>
       ) : (
-        <>
-          <div className="space-y-3">
-            {paginatedReports.map((report) => (
-              <ReportCard key={report.id} report={report} />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-2">
-              <p className="text-muted-foreground text-sm">
-                Showing {(currentPage - 1) * REPORTS_PER_PAGE + 1}–
-                {Math.min(currentPage * REPORTS_PER_PAGE, reports.length)} of {reports.length}{' '}
-                reports
-              </p>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage((p) => p - 1)}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <Button
-                    key={page}
-                    variant={page === currentPage ? 'default' : 'outline'}
-                    size="icon"
-                    className={`h-8 w-8 ${
-                      page === currentPage ? 'bg-amber-500 text-white hover:bg-amber-600' : ''
-                    }`}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </Button>
-                ))}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage((p) => p + 1)}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </>
+        <div className="space-y-3">
+          {reports.map((report) => (
+            <ReportCard key={report.id} report={report} />
+          ))}
+        </div>
       )}
     </div>
   );

@@ -50,7 +50,18 @@ export interface Professor {
 
 export type ReportStatus = 'PENDING' | 'IN_PROGRESS' | 'RESOLVED';
 
-export type ReportCategory = 'MAINTENANCE' | 'EQUIPMENT' | 'SAFETY' | 'CLEANLINESS' | 'OTHER';
+export type ReportCategory =
+  | 'PROJECTOR'
+  | 'SMART_BOARD'
+  | 'COMPUTER'
+  | 'PRINTER'
+  | 'AC'
+  | 'LIGHT'
+  | 'DOOR'
+  | 'PLUG'
+  | 'CLEANLINESS'
+  | 'SAFETY'
+  | 'OTHER';
 
 export interface Report {
   id: number;
