@@ -10,8 +10,10 @@ export function middleware(request: NextRequest) {
   // Apply i18n middleware
   const response = intlMiddleware(request);
 
-  // Get auth token from cookies
-  const token = request.cookies.get('accessToken')?.value;
+  // Get auth tokens from cookies
+  const accessToken = request.cookies.get('accessToken')?.value;
+  const refreshToken = request.cookies.get('refreshToken')?.value;
+  const hasSession = !!accessToken || !!refreshToken;
   const pathname = request.nextUrl.pathname;
 
   // Extract locale and route from pathname
@@ -23,13 +25,13 @@ export function middleware(request: NextRequest) {
   const protectedRoutes = ['/dashboard'];
   const isProtectedRoute = protectedRoutes.some((p) => route.startsWith(p));
 
-  // If accessing protected route without token, redirect to signin
-  if (isProtectedRoute && !token) {
+  // If accessing protected route without any token, redirect to signin
+  if (isProtectedRoute && !hasSession) {
     return NextResponse.redirect(new URL(`/${locale}/signin`, request.url));
   }
 
   // If accessing signin while authenticated, redirect to dashboard
-  if (route === '/signin' && token) {
+  if (route === '/signin' && hasSession) {
     const userRole = request.cookies.get('userRole')?.value || 'FACULTY';
     const dashboardPath = userRole === 'ADMIN' ? '/dashboard/admin' : '/dashboard/doctors';
     return NextResponse.redirect(new URL(`/${locale}${dashboardPath}`, request.url));

@@ -1,36 +1,194 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dolani - Smart Indoor Navigation System (Frontend)
 
-## Getting Started
+![Next.js 15](https://img.shields.io/badge/Next.js-15-black) ![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue) ![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind%20CSS-cyan) ![Status](https://img.shields.io/badge/Status-Development-orange)
 
-First, run the development server:
+A sophisticated, bilingual (English/Arabic) indoor navigation and faculty management web application for the College of Computer Science and Information Technology (CCSIT) at Imam Abdulrahman Bin Faisal University.
+
+This repository contains the **Frontend** source code, built with **Next.js 15 (App Router)**, **React 19**, and **Tailwind CSS v4**.
+
+---
+
+## 🚀 Features
+
+- **Bilingual Support (i18n):** Full support for English (LTR) and Arabic (RTL) layouts using `next-intl`.
+- **Admin Dashboard:** Analytics, interactive map editor, and room/faculty management.
+- **Faculty Portal:** Real-time status toggle (Available/Busy/Away) and schedule management.
+- **Public Landing Page:** Responsive marketing page with animations and project details.
+- **State Management:** Robust global state using **Zustand** (client) and **TanStack Query** (server).
+- **Modern UI:** High-quality components powered by **Shadcn UI** and **Framer Motion**.
+
+## 🛠 Tech Stack
+
+- **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) & [Shadcn UI](https://ui.shadcn.com/)
+- **State Management:** [Zustand](https://github.com/pmndrs/zustand)
+- **Data Fetching:** [TanStack Query (React Query)](https://tanstack.com/query)
+- **Internationalization:** [next-intl](https://next-intl-docs.vercel.app/)
+- **Icons:** [Lucide React](https://lucide.dev/)
+- **Animation:** [Framer Motion](https://www.framer.com/motion/)
+- **Validation:** [Zod](https://zod.dev/)
+
+---
+
+## 📋 Prerequisites
+
+Before you begin, ensure you have the following installed on your machine:
+
+1.  **Node.js**: Version **18.17.0** or later (Required for Next.js 15).
+    - Verify with: `node -v`
+2.  **Package Manager**: We recommend **pnpm** (fast and disk-efficient), but npm or yarn will work too.
+    - Install pnpm: `npm install -g pnpm`
+
+---
+
+## ⚡ Getting Started
+
+Follow these steps to set up the project locally.
+
+### 1. Clone the Repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/DevM7mdAli/dolani-frontend.git
+cd dolani-frontend
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Use `pnpm` to install all required packages.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm install
+```
 
-## Learn More
+### 3. Configure Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+Create a local environment file `.env.local` in the root directory.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+touch .env.local
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Open `.env.local` and add the following variables:
 
-## Deploy on Vercel
+```env
+# API Endpoint (Change this to your backend URL)
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Environment (development | production | test)
+NODE_ENV=development
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> **Note:** The `src/env.ts` file validates these variables at build time. If they are missing or invalid, the app will throw an error.
+
+### 4. Run the Development Server
+
+Start the application in development mode with Turbopack (faster HMR).
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+- **Landing Page**: `http://localhost:3000` (Redirects to `/en` or `/ar`)
+- **Admin Dashboard**: `/en/dashboard/admin`
+- **Faculty Portal**: `/en/dashboard/doctors`
+
+---
+
+## 📂 Project Structure
+
+Verified Senior-Level Architecture:
+
+```plaintext
+src/
+├── app/                  # Next.js App Router
+│   ├── [locale]/         # Dynamic locale segment (en/ar)
+│   │   ├── dashboard/    # Protected Dashboard Routes
+│   │   │   ├── admin/    # Admin-specific pages
+│   │   │   └── doctors/  # Faculty-specific pages
+│   │   ├── signin/       # Authentication pages
+│   │   └── page.tsx      # Landing Page
+│   └── globals.css       # Global styles & Tailwind
+├── components/           # React Components
+│   ├── landing/          # Landing page specific components (Hero, Nav, etc.)
+│   ├── layout/           # Layout components (Sidebar, Header)
+│   └── ui/               # Reusable UI primitives (Buttons, Cards, Inputs)
+├── hooks/                # Custom React Hooks
+├── i18n/                 # Internationalization Config
+│   ├── request.ts        # Request-scoped i18n setup
+│   └── routing.ts        # Routing configuration & navigation helpers
+├── lib/                  # Utilities & Libraries
+│   ├── axios.ts          # Configured Axios instance (Interceptors)
+│   └── utils.ts          # Helper functions (cn, formatting)
+├── messages/             # Translation strings (JSON)
+│   ├── ar.json           # Arabic translations
+│   └── en.json           # English translations
+├── store/                # Global State (Zustand)
+│   └── useUIStore.ts     # UI state (Sidebar, Theme, etc.)
+├── env.ts                # Environment Variable Validation Schema
+└── middleware.ts         # Next.js Middleware (Auth & i18n routing)
+```
+
+---
+
+## 🌍 Internationalization (i18n)
+
+This project uses `next-intl`.
+
+1.  **Adding Translations:**
+    - Edit `src/messages/en.json` for English.
+    - Edit `src/messages/ar.json` for Arabic.
+    - Keep keys consistent between both files to avoid missing translation errors.
+
+2.  **Usage in Components:**
+
+    ```tsx
+    import { useTranslations } from 'next-intl';
+
+    export default function MyComponent() {
+      const t = useTranslations('Common');
+      return <h1>{t('welcome')}</h1>;
+    }
+    ```
+
+3.  **Routing:**
+    Use strict navigation helpers from `@/i18n/routing` instead of `next/link` or `next/navigation`.
+
+    ```tsx
+    import { Link, useRouter } from '@/i18n/routing';
+    ```
+
+---
+
+## 📦 Build & Deploy
+
+To create an optimized production build:
+
+```bash
+pnpm build
+```
+
+To start the production server locally after building:
+
+```bash
+pnpm start
+```
+
+---
+
+## 🤝 Contribution
+
+1.  Create a new branch: `git checkout -b feature/amazing-feature`
+2.  Commit your changes: `git commit -m 'feat: Add amazing feature'`
+3.  Push to the branch: `git push origin feature/amazing-feature`
+4.  Open a Pull Request.
+
+---
+
+## 📄 License
+
+© 2026 Dolani Group 06.
+College of Computer Science and Information Technology (CCSIT),
+Imam Abdulrahman Bin Faisal University.

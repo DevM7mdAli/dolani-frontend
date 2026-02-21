@@ -75,7 +75,10 @@
     "analytics": "Analytics",
     "mapEditor": "Map Editor",
     "rooms": "Rooms",
-    "faculty": "Faculty"
+    "faculty": "Faculty",
+    "beacons": "Beacons",
+    "reports": "Reports",
+    "settings": "Settings"
   },
   "Faculty": {
     "status": "Status",
@@ -83,5 +86,47 @@
     "available": "Available",
     "busy": "Busy",
     "away": "Away"
+  },
+  "MapEditor": {
+    "title": "Map Editor",
+    "unsaved": "Unsaved changes",
+    "properties": "Properties",
+    "noSelection": "Click on a node, edge, or beacon to view its properties.",
+    "nodeProperties": "Node Properties",
+    "edgeProperties": "Edge Properties",
+    "beaconProperties": "Beacon Properties",
+    "tools": {
+      "select": "Select",
+      "node": "Add Node",
+      "path": "Draw Path",
+      "beacon": "Place Beacon",
+      "pan": "Pan"
+    },
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "delete": "Delete Selected",
+    "reset": "Reset All",
+    "save": "Save Graph",
+    "stats": {
+      "nodes": "Nodes",
+      "edges": "Edges",
+      "beacons": "Beacons",
+      "zoom": "Zoom"
+    },
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "e.g. Room 101",
+      "roomNumber": "Room Number",
+      "type": "Type",
+      "navigable": "Navigable",
+      "navigableHelp": "Include in pathfinding",
+      "distance": "Distance (px)",
+      "accessible": "Accessible",
+      "accessibleHelp": "Wheelchair accessible route",
+      "beaconName": "Beacon Name",
+      "beaconUuid": "Beacon UUID",
+      "linkedNode": "Linked Node",
+      "none": "— None —"
+    }
   }
 }
