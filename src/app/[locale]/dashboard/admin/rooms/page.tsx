@@ -2,16 +2,67 @@
 
 import { useMemo, useState } from 'react';
 
-import { useRooms } from '@/hooks/useRooms';
-import { ChevronLeft, ChevronRight, Edit2, Plus, Search, Trash2 } from 'lucide-react';
+import { useDepartments } from '@/hooks/useDepartments';
+import { type Room, useRooms } from '@/hooks/useRooms';
+import { ChevronLeft, ChevronRight, Edit2, Plus, Search, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
+const LOCATION_TYPES = [
+  'CLASSROOM',
+  'OFFICE',
+  'LAB',
+  'CONFERENCE',
+  'THEATER',
+  'CORRIDOR',
+  'EXIT',
+  'ELEVATOR',
+  'MAIN_HALL',
+  'RESTROOM',
+  'STAIRS',
+  'SERVICE',
+  'PRAYER_ROOM',
+  'SERVER_ROOM',
+  'STORE_ROOM',
+  'LOCKERS',
+];
+
+const LOCATION_TYPE_DISPLAY: Record<string, string> = {
+  CLASSROOM: 'محاضرات',
+  OFFICE: 'مكتب',
+  LAB: 'معمل',
+  CONFERENCE: 'اجتماعات',
+  THEATER: 'قاعة',
+  CORRIDOR: 'ممر',
+  EXIT: 'خروج',
+  ELEVATOR: 'مصعد',
+  MAIN_HALL: 'قاعة رئيسية',
+  RESTROOM: 'دورات مياه',
+  STAIRS: 'سلالم',
+  SERVICE: 'خدمة',
+  PRAYER_ROOM: 'غرفة الصلاة',
+  SERVER_ROOM: 'غرفة الخادم',
+  STORE_ROOM: 'مستودع',
+  LOCKERS: 'خزانات',
+};
+
 export default function RoomManagement() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedDeptFilter, setSelectedDeptFilter] = useState<number | 'all'>('all');
+  const [selectedTypeFilter, setSelectedTypeFilter] = useState<string | 'all'>('all');
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+
+  const pageSize = 6;
+
+  // Fetch all rooms data (unfiltered) using TanStack Query
   const { data, isLoading, error } = useRooms();
+
+  // Fetch departments using TanStack Query
+  const { data: departments = [] } = useDepartments();
 
   const stats = data?.statistics || {
     total: 0,
@@ -23,22 +74,120 @@ export default function RoomManagement() {
     labsPercentage: 0,
   };
 
-  // Filter rooms based on search term
+  // Apply all filters (search, department, type)
   const filteredRooms = useMemo(() => {
-    const rooms = data?.rooms || [];
-    if (!searchTerm) return rooms;
-    const lowerSearch = searchTerm.toLowerCase();
-    return rooms.filter(
-      (room) =>
-        room.code.toLowerCase().includes(lowerSearch) ||
-        room.name.toLowerCase().includes(lowerSearch) ||
-        room.dept.toLowerCase().includes(lowerSearch) ||
-        room.building.toLowerCase().includes(lowerSearch),
-    );
-  }, [data?.rooms, searchTerm]);
+    let rooms = data?.rooms || [];
 
-  // Sort and paginate (for now, just show all - pagination can be added later)
-  const displayedRooms = filteredRooms.slice(0, 6);
+    // Filter by department
+    if (selectedDeptFilter !== 'all') {
+      rooms = rooms.filter((room) => {
+        // Find the department that matches the selected ID
+        const dept = departments.find((d) => d.id === selectedDeptFilter);
+        return dept && room.dept === dept.name;
+      });
+    }
+
+    // Filter by room type
+    if (selectedTypeFilter !== 'all') {
+      rooms = rooms.filter((room) => {
+        const typeDisplay = LOCATION_TYPE_DISPLAY[selectedTypeFilter];
+        return room.type === typeDisplay;
+      });
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      rooms = rooms.filter(
+        (room) =>
+          room.code.toLowerCase().includes(lowerSearch) ||
+          room.name.toLowerCase().includes(lowerSearch) ||
+          room.dept.toLowerCase().includes(lowerSearch) ||
+          room.building.toLowerCase().includes(lowerSearch),
+      );
+    }
+
+    return rooms;
+  }, [data?.rooms, searchTerm, selectedDeptFilter, selectedTypeFilter, departments]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredRooms.length / pageSize);
+  const startIdx = (currentPage - 1) * pageSize;
+  const displayedRooms = filteredRooms.slice(startIdx, startIdx + pageSize);
+
+  // Generate page numbers for pagination buttons
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxPagesToShow = 3;
+
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage > 1) pages.push(1);
+      if (currentPage > 2) pages.push('...');
+
+      const start = Math.max(1, currentPage - 1);
+      const end = Math.min(totalPages, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        if (!pages.includes(i)) pages.push(i);
+      }
+
+      if (currentPage < totalPages - 1) pages.push('...');
+      if (currentPage < totalPages) pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
+  // Handle pagination
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handlePageClick = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // Handle filter changes
+  const handleDeptFilterChange = (value: string) => {
+    setSelectedDeptFilter(value === 'all' ? 'all' : parseInt(value));
+    setCurrentPage(1); // Reset to first page
+  };
+
+  const handleTypeFilterChange = (value: string) => {
+    setSelectedTypeFilter(value);
+    setCurrentPage(1); // Reset to first page
+  };
+
+  // Handle edit room
+  const handleEditRoom = (room: Room) => {
+    setEditingRoom({ ...room });
+    setIsEditOpen(true);
+  };
+
+  // Handle close edit modal
+  const handleCloseEdit = () => {
+    setIsEditOpen(false);
+    setEditingRoom(null);
+  };
+
+  // Handle save edit (TODO: Connect to backend update endpoint)
+  const handleSaveEdit = (): void => {
+    // TODO: Call backend API to update room
+    console.log('Saving room:', editingRoom);
+    handleCloseEdit();
+  };
 
   return (
     <div className="dir-rtl min-h-screen bg-gray-50 p-6 text-right" dir="rtl">
@@ -108,11 +257,29 @@ export default function RoomManagement() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <select className="min-w-[150px] rounded-md border border-gray-200 bg-gray-50 p-2 text-sm text-gray-600">
-              <option>جميع الأقسام</option>
+            <select
+              className="min-w-[150px] rounded-md border border-gray-200 bg-gray-50 p-2 text-sm text-gray-600"
+              value={selectedDeptFilter}
+              onChange={(e) => handleDeptFilterChange(e.target.value)}
+            >
+              <option value="all">جميع الأقسام</option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
+                </option>
+              ))}
             </select>
-            <select className="min-w-[150px] rounded-md border border-gray-200 bg-gray-50 p-2 text-sm text-gray-600">
-              <option>جميع الحالات</option>
+            <select
+              className="min-w-[150px] rounded-md border border-gray-200 bg-gray-50 p-2 text-sm text-gray-600"
+              value={selectedTypeFilter}
+              onChange={(e) => handleTypeFilterChange(e.target.value)}
+            >
+              <option value="all">جميع الأنواع</option>
+              {LOCATION_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {LOCATION_TYPE_DISPLAY[type] || type}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -201,15 +368,9 @@ export default function RoomManagement() {
                           size="icon"
                           variant="outline"
                           className="h-8 w-8 border-blue-100 text-blue-600 hover:bg-blue-50"
+                          onClick={() => handleEditRoom(room)}
                         >
                           <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8 border-red-100 text-red-500 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </td>
@@ -223,30 +384,171 @@ export default function RoomManagement() {
         {/* Pagination */}
         <div className="flex items-center justify-between border-t bg-white p-4">
           <p className="text-xs font-medium text-gray-500">
-            عرض {displayedRooms.length > 0 ? 1 : 0}-{displayedRooms.length} من {stats.total} غرفة
+            عرض {displayedRooms.length > 0 ? startIdx + 1 : 0}-
+            {Math.min(startIdx + pageSize, filteredRooms.length)} من {filteredRooms.length} غرفة
           </p>
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" className="h-8 gap-1 px-3 text-xs">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1 px-3 text-xs"
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages}
+            >
               <span>التالي</span>
-              <ChevronLeft className="h-3 w-3" />
-            </Button>
-            {[3, 2, 1].map((n) => (
-              <Button
-                key={n}
-                variant={n === 1 ? 'default' : 'outline'}
-                size="icon"
-                className={`h-8 w-8 text-xs ${n === 1 ? 'bg-teal-800' : ''}`}
-              >
-                {n}
-              </Button>
-            ))}
-            <Button variant="outline" size="sm" className="h-8 gap-1 px-3 text-xs">
               <ChevronRight className="h-3 w-3" />
+            </Button>
+            {getPageNumbers().map((num, idx) =>
+              typeof num === 'number' ? (
+                <Button
+                  key={idx}
+                  variant={num === currentPage ? 'default' : 'outline'}
+                  size="icon"
+                  className={`h-8 w-8 text-xs ${num === currentPage ? 'bg-teal-800' : ''}`}
+                  onClick={() => handlePageClick(num)}
+                >
+                  {num}
+                </Button>
+              ) : (
+                <span key={idx} className="px-2 text-gray-400">
+                  {num}
+                </span>
+              ),
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1 px-3 text-xs"
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1}
+            >
+              <ChevronLeft className="h-3 w-3" />
               <span>السابق</span>
             </Button>
           </div>
         </div>
       </Card>
+
+      {/* Edit Room Modal */}
+      {isEditOpen && editingRoom && (
+        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+          <Card className="w-full max-w-md p-6 shadow-lg">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-teal-800">تعديل الغرفة</h3>
+              <button onClick={handleCloseEdit} className="text-gray-400 hover:text-gray-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">رمز الغرفة</label>
+                <Input
+                  type="text"
+                  value={editingRoom.code}
+                  readOnly
+                  className="mt-1 bg-gray-100"
+                  dir="rtl"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">اسم الغرفة</label>
+                <Input
+                  type="text"
+                  value={editingRoom.name}
+                  onChange={(e) => setEditingRoom({ ...editingRoom, name: e.target.value })}
+                  className="mt-1"
+                  dir="rtl"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">النوع</label>
+                <select
+                  className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  value={
+                    Object.keys(LOCATION_TYPE_DISPLAY).find(
+                      (key) => LOCATION_TYPE_DISPLAY[key] === editingRoom.type,
+                    ) || ''
+                  }
+                  onChange={(e) =>
+                    setEditingRoom({
+                      ...editingRoom,
+                      type: LOCATION_TYPE_DISPLAY[e.target.value] || e.target.value,
+                    })
+                  }
+                  dir="rtl"
+                >
+                  {LOCATION_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {LOCATION_TYPE_DISPLAY[type] || type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">القسم</label>
+                <Input
+                  type="text"
+                  value={editingRoom.dept}
+                  readOnly
+                  className="mt-1 bg-gray-100"
+                  dir="rtl"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">الطابق</label>
+                <Input
+                  type="number"
+                  value={editingRoom.floor}
+                  onChange={(e) =>
+                    setEditingRoom({ ...editingRoom, floor: parseInt(e.target.value) })
+                  }
+                  className="mt-1"
+                  dir="rtl"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">المبنى</label>
+                <Input
+                  type="text"
+                  value={editingRoom.building}
+                  readOnly
+                  className="mt-1 bg-gray-100"
+                  dir="rtl"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">الحالة</label>
+                <Input
+                  type="text"
+                  value={editingRoom.status}
+                  readOnly
+                  className="mt-1 bg-gray-100"
+                  dir="rtl"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <Button
+                className="flex-1 bg-teal-700 text-white hover:bg-teal-800"
+                onClick={handleSaveEdit}
+              >
+                حفظ
+              </Button>
+              <Button variant="outline" className="flex-1" onClick={handleCloseEdit}>
+                إلغاء
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
