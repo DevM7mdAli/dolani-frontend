@@ -19,6 +19,7 @@ export const LandingPage: GlobalConfig = {
         { name: 'faq', type: 'text', localized: true, required: true },
         { name: 'viewDemo', type: 'text', localized: true, required: true },
         { name: 'login', type: 'text', localized: true, required: true },
+        { name: 'language', type: 'text', localized: true, required: true },
       ],
     },
     {
@@ -32,6 +33,12 @@ export const LandingPage: GlobalConfig = {
         { name: 'watchDemo', type: 'text', localized: true, required: true },
         { name: 'activeUsers', type: 'text', localized: true, required: true },
         { name: 'activeUsersText', type: 'text', localized: true, required: true },
+        {
+          name: 'heroImage',
+          type: 'relationship',
+          relationTo: 'media',
+          required: false,
+        },
       ],
     },
     {
@@ -87,6 +94,16 @@ export const LandingPage: GlobalConfig = {
             { name: 'description', type: 'textarea', localized: true, required: true },
           ],
         },
+        {
+          name: 'whyChooseImage',
+          type: 'relationship',
+          relationTo: 'media',
+          required: false,
+        },
+        { name: 'statBadge1Value', type: 'text', localized: true, required: true },
+        { name: 'statBadge1Label', type: 'text', localized: true, required: true },
+        { name: 'statBadge2Value', type: 'text', localized: true, required: true },
+        { name: 'statBadge2Label', type: 'text', localized: true, required: true },
       ],
     },
     {

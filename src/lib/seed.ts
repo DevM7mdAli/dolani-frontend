@@ -26,9 +26,10 @@ export const seed = async () => {
         faq: 'FAQ',
         viewDemo: 'View Demo',
         login: 'Login',
+        language: 'Language',
       },
       hero: {
-        headline: 'Never Get Lost',
+        headline: "You'll Never Get Lost,",
         headlineHighlight: 'on Campus.',
         subheadline:
           'Smart indoor navigation powered by BLE beacons. Real-time faculty tracking, emergency routes, and bilingual support—designed for everyone.',
@@ -36,6 +37,7 @@ export const seed = async () => {
         watchDemo: 'Watch Demo',
         activeUsers: '145+ Active Users',
         activeUsersText: 'Trusted by CCSIT students & faculty',
+        heroImage: null,
       },
       features: {
         badge: 'POWERFUL FEATURES',
@@ -135,6 +137,11 @@ export const seed = async () => {
               'Instant evacuation mode with admin control for campus-wide safety alerts.',
           },
         ],
+        whyChooseImage: null,
+        statBadge1Value: '98%',
+        statBadge1Label: 'Satisfaction Rate',
+        statBadge2Value: '145+',
+        statBadge2Label: 'Active Users',
       },
       techStack: {
         badge: 'TECHNOLOGY STACK',
@@ -302,6 +309,7 @@ export const seed = async () => {
         faq: 'الأسئلة الشائعة',
         viewDemo: 'عرض تجريبي',
         login: 'تسجيل الدخول',
+        language: 'اللغة',
       },
       hero: {
         headline: 'لن تضيع أبداً',
@@ -312,6 +320,7 @@ export const seed = async () => {
         watchDemo: 'شاهد العرض',
         activeUsers: '+145 مستخدم نشط',
         activeUsersText: 'موثوق من قبل طلاب وأعضاء هيئة التدريس في كلية علوم الحاسب',
+        heroImage: null,
       },
       features: {
         badge: 'مميزات قوية',
@@ -406,6 +415,11 @@ export const seed = async () => {
             description: 'وضع إخلاء فوري مع تحكم إداري لتنبيهات السلامة على مستوى الحرم الجامعي.',
           },
         ],
+        whyChooseImage: null,
+        statBadge1Value: '٩٨٪',
+        statBadge1Label: 'معدل الرضا',
+        statBadge2Value: '+١٤٥',
+        statBadge2Label: 'مستخدم نشط',
       },
       techStack: {
         badge: 'حزمة التقنية',

@@ -116,3 +116,7 @@
 .input-base:focus {
   @apply ring-ring ring-1;
 }
+
+html {
+  scroll-behavior: smooth;
+}

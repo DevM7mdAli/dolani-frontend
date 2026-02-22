@@ -1,38 +1,52 @@
 'use client';
 
 import type { LandingPage } from '@/payload-types';
-import { Map, Search, ShieldAlert, UserCheck } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Globe,
+  Map,
+  Search,
+  ShieldAlert,
+  Users,
+  WifiOff,
+  Zap,
+} from 'lucide-react';
 import { motion } from 'motion/react';
+import { useLocale } from 'next-intl';
 
 import { Card } from '@/components/ui/card';
 
-const iconMap = {
-  precision: Map,
-  faculty: UserCheck,
-  search: Search,
-  emergency: ShieldAlert,
-};
-
-const colorMap = {
-  precision: 'text-blue-500',
-  faculty: 'text-green-500',
-  search: 'text-purple-500',
-  emergency: 'text-red-500',
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const iconMap: Record<string, any> = {
+  Map: Map,
+  Users: Users,
+  Search: Search,
+  ShieldAlert: ShieldAlert,
+  Globe: Globe,
+  WifiOff: WifiOff,
 };
 
 export function FeaturesGrid({ data }: { data: LandingPage['features'] }) {
+  const locale = useLocale();
+  const isRtl = locale === 'ar';
+  const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
+
   return (
-    <section id="features" className="relative bg-slate-50 py-24">
+    <section id="features" className="relative bg-white py-24">
       <div className="container mx-auto px-6">
-        <div className="mb-16 text-center">
-          <h2 className="text-primary mb-4 text-3xl font-bold">{data.title}</h2>
-          <div className="bg-secondary mx-auto h-1 w-16 rounded-full"></div>
+        <div className="mb-16 flex flex-col items-center text-center">
+          <div className="bg-accent text-primary mb-4 flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold tracking-wider uppercase">
+            <Zap className="h-3 w-3" />
+            {data.badge}
+          </div>
+          <h2 className="text-primary mb-4 text-4xl font-bold md:text-5xl">{data.title}</h2>
+          <p className="text-muted-foreground max-w-2xl text-lg">{data.subtitle}</p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {data.items?.map((feature, index) => {
-            const Icon = iconMap[feature.icon as keyof typeof iconMap] || Map;
-            const color = colorMap[feature.icon as keyof typeof colorMap] || 'text-primary';
+            const Icon = iconMap[feature.icon] || Map;
             return (
               <motion.div
                 key={feature.id}
@@ -41,16 +55,17 @@ export function FeaturesGrid({ data }: { data: LandingPage['features'] }) {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <Card className="group h-full border-none bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                  <div
-                    className={`group-hover:bg-primary/10 mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 transition-colors`}
-                  >
-                    <Icon className={`h-6 w-6 ${color}`} />
+                <Card className="group bg-card h-full rounded-2xl border-none p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm">
+                    <Icon className="text-primary h-6 w-6" strokeWidth={1.5} />
                   </div>
-                  <h3 className="group-hover:text-primary mb-3 text-xl font-bold text-slate-800 transition-colors">
-                    {feature.title}
-                  </h3>
-                  <p className="leading-relaxed text-slate-600">{feature.description}</p>
+                  <h3 className="text-primary mb-3 text-xl font-bold">{feature.title}</h3>
+                  <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
+                    {feature.description}
+                  </p>
+                  <div className="text-primary mt-auto flex items-center text-sm font-bold">
+                    {feature.linkText} <ArrowIcon className="ml-1 h-4 w-4" />
+                  </div>
                 </Card>
               </motion.div>
             );

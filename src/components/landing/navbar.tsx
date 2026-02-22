@@ -34,14 +34,15 @@ export function LandingNavbar({ data }: { data: LandingPage['nav'] }) {
       <div className="container mx-auto flex h-16 items-center justify-between px-6">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="bg-secondary flex h-8 w-8 items-center justify-center rounded-full">
-            <MapPin className="text-secondary-foreground h-5 w-5" />
+          <div className="relative flex items-center justify-center">
+            <MapPin className="text-primary h-8 w-8" strokeWidth={2} />
+            <div className="bg-secondary absolute top-2.5 h-2 w-2 rounded-full"></div>
           </div>
           <div className="flex flex-col">
-            <span className="text-primary text-lg leading-none font-bold tracking-tight">
+            <span className="text-primary text-xl leading-none font-bold tracking-tight">
               {data.logoText}
             </span>
-            <span className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
+            <span className="text-muted-foreground text-[10px] font-medium tracking-wider">
               {data.logoSubtext}
             </span>
           </div>
@@ -128,7 +129,7 @@ export function LandingNavbar({ data }: { data: LandingPage['nav'] }) {
                   className="w-full justify-center rounded-full"
                 >
                   <Globe className="mr-2 h-4 w-4" />
-                  Language
+                  {data.language}
                 </Button>
               </div>
             </div>

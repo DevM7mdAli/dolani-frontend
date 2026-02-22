@@ -334,6 +334,7 @@ export interface LandingPage {
     faq: string;
     viewDemo: string;
     login: string;
+    language: string;
   };
   hero: {
     headline: string;
@@ -343,6 +344,7 @@ export interface LandingPage {
     watchDemo: string;
     activeUsers: string;
     activeUsersText: string;
+    heroImage?: (number | null) | Media;
   };
   features: {
     badge: string;
@@ -375,6 +377,11 @@ export interface LandingPage {
       description: string;
       id?: string | null;
     }[];
+    whyChooseImage?: (number | null) | Media;
+    statBadge1Value: string;
+    statBadge1Label: string;
+    statBadge2Value: string;
+    statBadge2Label: string;
   };
   techStack: {
     badge: string;
@@ -463,6 +470,7 @@ export interface LandingPageSelect<T extends boolean = true> {
         faq?: T;
         viewDemo?: T;
         login?: T;
+        language?: T;
       };
   hero?:
     | T
@@ -474,6 +482,7 @@ export interface LandingPageSelect<T extends boolean = true> {
         watchDemo?: T;
         activeUsers?: T;
         activeUsersText?: T;
+        heroImage?: T;
       };
   features?:
     | T
@@ -516,6 +525,11 @@ export interface LandingPageSelect<T extends boolean = true> {
               description?: T;
               id?: T;
             };
+        whyChooseImage?: T;
+        statBadge1Value?: T;
+        statBadge1Label?: T;
+        statBadge2Value?: T;
+        statBadge2Label?: T;
       };
   techStack?:
     | T

@@ -2,46 +2,70 @@
 
 import { Link as I18nLink } from '@/i18n/routing';
 import type { LandingPage } from '@/payload-types';
-import { ArrowRight, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useLocale } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 
 export function CTASection({ data }: { data: LandingPage['cta'] }) {
+  const locale = useLocale();
+  const isRtl = locale === 'ar';
+  const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
+
   return (
-    <section className="bg-primary relative overflow-hidden py-24 text-white">
+    <section className="bg-primary text-primary-foreground relative overflow-hidden py-32">
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-size-[40px_40px]"></div>
+      <div className="absolute inset-0 z-0">
+        <div className="bg-secondary/20 absolute top-0 right-0 h-150 w-150 translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px]"></div>
+        <div className="bg-accent/20 absolute bottom-0 left-0 h-100 w-100 -translate-x-1/2 translate-y-1/2 rounded-full blur-[100px]"></div>
       </div>
 
       <div className="relative z-10 container mx-auto px-6 text-center">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mx-auto max-w-3xl"
+          transition={{ duration: 0.8 }}
+          className="mx-auto max-w-4xl"
         >
-          <h2 className="mb-6 text-4xl font-bold md:text-5xl">{data.title}</h2>
-          <p className="mb-10 text-lg text-white/80 md:text-xl">{data.subtitle}</p>
+          <h2 className="mb-8 text-5xl leading-tight font-extrabold tracking-tight md:text-6xl">
+            {data.title}
+          </h2>
+          <p className="text-primary-foreground/80 mx-auto mb-12 max-w-2xl text-xl font-light md:text-2xl">
+            {data.subtitle}
+          </p>
 
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="mb-16 flex flex-col items-center justify-center gap-6 sm:flex-row">
             <Button
               size="lg"
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-14 w-full px-8 text-lg font-bold shadow-lg transition-transform duration-200 hover:scale-105 sm:w-auto"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-secondary/20 h-16 w-full rounded-full px-10 text-lg font-bold shadow-lg transition-all duration-300 hover:scale-105 sm:w-auto"
             >
-              {data.downloadIos} <Download className="ml-2 h-5 w-5" />
+              {data.downloadIos} <ArrowIcon className="ml-2 h-5 w-5" />
             </Button>
             <I18nLink href="/signin">
               <Button
-                variant="outline"
                 size="lg"
-                className="h-14 w-full border-white/20 bg-white/10 px-8 text-lg font-semibold text-white backdrop-blur-sm hover:bg-white/20 sm:w-auto"
+                className="text-primary h-16 w-full rounded-full bg-white px-10 text-lg font-bold shadow-lg transition-all duration-300 hover:scale-105 hover:bg-white/90 sm:w-auto"
               >
-                {data.downloadAndroid} <ArrowRight className="ml-2 h-5 w-5" />
+                {data.downloadAndroid} <ArrowIcon className="ml-2 h-5 w-5" />
               </Button>
             </I18nLink>
+          </div>
+
+          <div className="flex flex-col items-center justify-center gap-8 text-sm font-medium text-white/90 md:flex-row md:gap-12">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="text-secondary h-5 w-5" />
+              <span>{data.feature1}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="text-secondary h-5 w-5" />
+              <span>{data.feature2}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="text-secondary h-5 w-5" />
+              <span>{data.feature3}</span>
+            </div>
           </div>
         </motion.div>
       </div>
