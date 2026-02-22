@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@hookform/resolvers": "^5.2.2",
     "@ng-icons/iconsax": "^33.0.0",
     "@payloadcms/db-postgres": "^3.77.0",
     "@payloadcms/next": "^3.77.0",
@@ -40,8 +39,7 @@
     "konva": "^10.2.0",
     "lucide-react": "^0.563.0",
     "motion": "^12.34.0",
-    "motion": "^12.34.0",
-    "next": "15.5.3",
+    "next": "15.5.9",
     "next-intl": "^4.8.2",
     "payload": "^3.77.0",
     "radix-ui": "^1.4.3",
