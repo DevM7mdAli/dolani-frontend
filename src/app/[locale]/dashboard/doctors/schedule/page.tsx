@@ -350,7 +350,9 @@ export default function SchedulePage() {
                   ) : (
                     <Save className="h-4 w-4" />
                   )}
-                  {upsertSchedule.isPending ? t('schedulePage.saving') : t('schedulePage.saveChanges')}
+                  {upsertSchedule.isPending
+                    ? t('schedulePage.saving')
+                    : t('schedulePage.saveChanges')}
                 </Button>
               </div>
             </div>
