@@ -30,42 +30,32 @@ import {
   Tv,
   User,
 } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 // ─── Meta ─────────────────────────────────────────────────────────────────────
 
-const categoryMeta: Record<ReportCategory, { label: string; icon: React.ReactNode }> = {
-  PROJECTOR: { label: 'Projector', icon: <Tv className="h-3.5 w-3.5" /> },
-  SMART_BOARD: { label: 'Smart Board', icon: <Monitor className="h-3.5 w-3.5" /> },
-  COMPUTER: { label: 'Computer', icon: <Monitor className="h-3.5 w-3.5" /> },
-  PRINTER: { label: 'Printer', icon: <Printer className="h-3.5 w-3.5" /> },
-  AC: { label: 'AC', icon: <Snowflake className="h-3.5 w-3.5" /> },
-  LIGHT: { label: 'Light', icon: <Lightbulb className="h-3.5 w-3.5" /> },
-  DOOR: { label: 'Door', icon: <DoorOpen className="h-3.5 w-3.5" /> },
-  PLUG: { label: 'Power Outlet', icon: <Plug className="h-3.5 w-3.5" /> },
-  CLEANLINESS: { label: 'Cleanliness', icon: <Sparkles className="h-3.5 w-3.5" /> },
-  SAFETY: { label: 'Safety', icon: <Shield className="h-3.5 w-3.5" /> },
-  OTHER: { label: 'Other', icon: <HelpCircle className="h-3.5 w-3.5" /> },
+const categoryIcons: Record<ReportCategory, React.ReactNode> = {
+  PROJECTOR: <Tv className="h-3.5 w-3.5" />,
+  SMART_BOARD: <Monitor className="h-3.5 w-3.5" />,
+  COMPUTER: <Monitor className="h-3.5 w-3.5" />,
+  PRINTER: <Printer className="h-3.5 w-3.5" />,
+  AC: <Snowflake className="h-3.5 w-3.5" />,
+  LIGHT: <Lightbulb className="h-3.5 w-3.5" />,
+  DOOR: <DoorOpen className="h-3.5 w-3.5" />,
+  PLUG: <Plug className="h-3.5 w-3.5" />,
+  CLEANLINESS: <Sparkles className="h-3.5 w-3.5" />,
+  SAFETY: <Shield className="h-3.5 w-3.5" />,
+  OTHER: <HelpCircle className="h-3.5 w-3.5" />,
 };
 
-const statusConfig: Record<ReportStatus, { label: string; bg: string; text: string; dot: string }> =
-  {
-    PENDING: { label: 'Pending', bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
-    IN_PROGRESS: {
-      label: 'In Progress',
-      bg: 'bg-blue-100',
-      text: 'text-blue-700',
-      dot: 'bg-blue-500',
-    },
-    RESOLVED: {
-      label: 'Resolved',
-      bg: 'bg-green-100',
-      text: 'text-green-700',
-      dot: 'bg-green-500',
-    },
-  };
+const statusVisuals: Record<ReportStatus, { bg: string; text: string; dot: string }> = {
+  PENDING: { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
+  IN_PROGRESS: { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' },
+  RESOLVED: { bg: 'bg-green-100', text: 'text-green-700', dot: 'bg-green-500' },
+};
 
 const categoryOptions: ReportCategory[] = [
   'PROJECTOR',
@@ -81,8 +71,8 @@ const categoryOptions: ReportCategory[] = [
   'OTHER',
 ];
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string, locale: string) {
+  return new Date(iso).toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -105,8 +95,9 @@ function ReportCard({
   isPendingResolve: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const cat = categoryMeta[report.category];
-  const status = statusConfig[report.status];
+  const t = useTranslations('IT');
+  const locale = useLocale();
+  const sv = statusVisuals[report.status];
 
   return (
     <Card className="bg-white p-5 transition-shadow hover:shadow-md">
@@ -121,8 +112,8 @@ function ReportCard({
               {report.title}
             </Link>
             <span className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-700">
-              {cat.icon}
-              {cat.label}
+              {categoryIcons[report.category]}
+              {t(`categories.${report.category}` as `categories.${ReportCategory}`)}
             </span>
           </div>
 
@@ -137,7 +128,7 @@ function ReportCard({
             </span>
             <span className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5" />
-              {formatDate(report.createdAt)}
+              {formatDate(report.createdAt, locale)}
             </span>
           </div>
 
@@ -146,14 +137,15 @@ function ReportCard({
             <div className="space-y-2 pt-1">
               <p className="text-sm text-gray-600">{report.description}</p>
               <p className="text-muted-foreground text-xs">
-                Submitted by{' '}
+                {t('reports.submittedBy')}{' '}
                 <span className="font-medium text-gray-700">{report.professor.full_name}</span>
                 {report.professor.department && ` · ${report.professor.department.name}`}
               </p>
               {report.status === 'RESOLVED' && report.resolved_by && (
                 <p className="text-xs text-green-700">
-                  Resolved by {report.resolved_by.user.name}
-                  {report.resolved_at && ` on ${formatDate(report.resolved_at)}`}
+                  {t('reports.resolvedBy')} {report.resolved_by.user.name}
+                  {report.resolved_at &&
+                    ` ${t('reports.resolvedOn')} ${formatDate(report.resolved_at, locale)}`}
                 </p>
               )}
             </div>
@@ -170,7 +162,7 @@ function ReportCard({
                   onClick={onStart}
                 >
                   {isPendingStart ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
-                  Start Working
+                  {t('reports.startWorking')}
                 </Button>
               )}
               {report.status === 'IN_PROGRESS' && (
@@ -183,7 +175,7 @@ function ReportCard({
                   {isPendingResolve ? (
                     <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
                   ) : null}
-                  Mark as Resolved
+                  {t('reports.markResolved')}
                 </Button>
               )}
             </div>
@@ -193,16 +185,16 @@ function ReportCard({
         {/* Right: Status + expand */}
         <div className="flex shrink-0 flex-col items-end gap-2">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${status.bg} ${status.text}`}
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${sv.bg} ${sv.text}`}
           >
-            <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-            {status.label}
+            <span className={`h-1.5 w-1.5 rounded-full ${sv.dot}`} />
+            {t(`statuses.${report.status}` as `statuses.${ReportStatus}`)}
           </span>
           <button
             type="button"
             onClick={() => setExpanded(!expanded)}
             className="text-muted-foreground hover:text-foreground transition-colors"
-            aria-label={expanded ? 'Collapse' : 'Expand'}
+            aria-label={expanded ? t('reports.collapse') : t('reports.expand')}
           >
             {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
@@ -232,20 +224,21 @@ function ReportSkeleton() {
 
 type StatusFilter = 'ALL' | ReportStatus;
 
-const statusTabs: { label: string; value: StatusFilter }[] = [
-  { label: 'All', value: 'ALL' },
-  { label: 'Pending', value: 'PENDING' },
-  { label: 'In Progress', value: 'IN_PROGRESS' },
-  { label: 'Resolved', value: 'RESOLVED' },
-];
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ITReportsPage() {
+  const t = useTranslations('IT');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
   const [categoryFilter, setCategoryFilter] = useState<ReportCategory | ''>('');
+
+  const statusTabs: { label: string; value: StatusFilter }[] = [
+    { label: t('reports.allStatus'), value: 'ALL' },
+    { label: t('statuses.PENDING'), value: 'PENDING' },
+    { label: t('statuses.IN_PROGRESS'), value: 'IN_PROGRESS' },
+    { label: t('statuses.RESOLVED'), value: 'RESOLVED' },
+  ];
 
   // Debounce search input
   useEffect(() => {
@@ -284,7 +277,7 @@ export default function ITReportsPage() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by title, room, professor…"
+            placeholder={t('reports.searchPlaceholder')}
             className="h-9 w-full rounded-md border border-gray-200 bg-white py-2 pr-3 pl-9 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
           />
         </div>
@@ -295,10 +288,10 @@ export default function ITReportsPage() {
           onChange={(e) => setCategoryFilter(e.target.value as ReportCategory | '')}
           className="h-9 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
         >
-          <option value="">All Categories</option>
+          <option value="">{t('reports.allCategories')}</option>
           {categoryOptions.map((cat) => (
             <option key={cat} value={cat}>
-              {categoryMeta[cat].label}
+              {t(`categories.${cat}` as `categories.${ReportCategory}`)}
             </option>
           ))}
         </select>
@@ -326,8 +319,8 @@ export default function ITReportsPage() {
       {isError && (
         <Card className="flex flex-col items-center justify-center bg-white py-12 text-center">
           <AlertTriangle className="text-destructive mb-3 h-10 w-10" />
-          <p className="font-semibold">Failed to load reports.</p>
-          <p className="text-muted-foreground mt-1 text-sm">Please refresh the page.</p>
+          <p className="font-semibold">{t('reports.failedLoad')}</p>
+          <p className="text-muted-foreground mt-1 text-sm">{t('reports.refreshPage')}</p>
         </Card>
       )}
 
@@ -346,11 +339,11 @@ export default function ITReportsPage() {
           {reports.length === 0 ? (
             <Card className="flex flex-col items-center justify-center bg-white py-16 text-center">
               <AlertTriangle className="text-muted-foreground mb-3 h-12 w-12" />
-              <h3 className="text-lg font-semibold">No reports found</h3>
+              <h3 className="text-lg font-semibold">{t('reports.noReports')}</h3>
               <p className="text-muted-foreground mt-1 text-sm">
                 {statusFilter === 'ALL' && !debouncedSearch
-                  ? 'No reports have been submitted yet.'
-                  : 'Try adjusting your filters or search term.'}
+                  ? t('reports.noReportsYet')
+                  : t('reports.adjustFilters')}
               </p>
             </Card>
           ) : (

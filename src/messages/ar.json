@@ -231,5 +231,86 @@
       "linkedNode": "العقدة المرتبطة",
       "none": "— لا شيء —"
     }
+  },
+  "IT": {
+    "sidebar": {
+      "title": "دولاني IT",
+      "role": "موظف تقنية المعلومات",
+      "overview": "نظرة عامة",
+      "reports": "البلاغات",
+      "signOut": "تسجيل الخروج",
+      "signingOut": "جارٍ تسجيل الخروج…",
+      "itDashboard": "لوحة تحكم تقنية المعلومات",
+      "reportNumber": "بلاغ #{id}"
+    },
+    "overview": {
+      "heading": "لوحة تحكم تقنية المعلومات",
+      "subtitle": "مراقبة وإدارة بلاغات المرافق في جميع الغرف",
+      "totalReports": "إجمالي البلاغات",
+      "pending": "قيد الانتظار",
+      "inProgress": "قيد التنفيذ",
+      "resolved": "تم الحل",
+      "pendingReports": "البلاغات المعلقة",
+      "viewAll": "عرض الكل",
+      "allCaughtUp": "أنت مواكب لكل شيء!",
+      "noPendingDesc": "لا توجد بلاغات معلقة في الوقت الحالي.",
+      "startWorking": "بدء العمل",
+      "view": "عرض",
+      "inProgressCount": "{count} بلاغات قيد التنفيذ",
+      "resolvedCount": "{count} بلاغات مكتملة"
+    },
+    "reports": {
+      "searchPlaceholder": "البحث حسب العنوان، الغرفة، الأستاذ…",
+      "allCategories": "جميع الفئات",
+      "allStatus": "الكل",
+      "submittedBy": "قدمه",
+      "resolvedBy": "تم الحل بواسطة",
+      "resolvedOn": "في",
+      "startWorking": "بدء العمل",
+      "markResolved": "تحديد كمحلول",
+      "collapse": "طي",
+      "expand": "توسيع",
+      "failedLoad": "فشل تحميل البلاغات.",
+      "refreshPage": "يرجى تحديث الصفحة.",
+      "noReports": "لا توجد بلاغات",
+      "noReportsYet": "لم يتم تقديم أي بلاغات بعد.",
+      "adjustFilters": "حاول تعديل الفلاتر أو مصطلح البحث."
+    },
+    "detail": {
+      "reportNotFound": "البلاغ غير موجود",
+      "reportNotFoundDesc": "ربما تم حذف هذا البلاغ أو أن المعرف غير صالح.",
+      "backToReports": "العودة إلى البلاغات",
+      "submitted": "تم التقديم",
+      "description": "الوصف",
+      "submittedByMember": "بلاغ قدمه هذا عضو هيئة التدريس",
+      "department": "القسم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "officeRoom": "غرفة المكتب",
+      "reportResolved": "تم حل البلاغ",
+      "resolvedBy": "تم الحل بواسطة",
+      "resolvedOn": "تم الحل في",
+      "startWorking": "بدء العمل",
+      "markResolved": "تحديد كمحلول",
+      "resolvedBtn": "تم الحل"
+    },
+    "categories": {
+      "PROJECTOR": "جهاز العرض",
+      "SMART_BOARD": "السبورة الذكية",
+      "COMPUTER": "الحاسوب",
+      "PRINTER": "الطابعة",
+      "AC": "التكييف",
+      "LIGHT": "الإضاءة",
+      "DOOR": "الباب",
+      "PLUG": "مقبس الطاقة",
+      "CLEANLINESS": "النظافة",
+      "SAFETY": "السلامة",
+      "OTHER": "أخرى"
+    },
+    "statuses": {
+      "PENDING": "قيد الانتظار",
+      "IN_PROGRESS": "قيد التنفيذ",
+      "RESOLVED": "تم الحل"
+    }
   }
 }

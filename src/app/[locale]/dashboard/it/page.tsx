@@ -25,42 +25,32 @@ import {
   Tv,
   User,
 } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 // ─── Shared meta ─────────────────────────────────────────────────────────────
 
-const categoryMeta: Record<ReportCategory, { label: string; icon: React.ReactNode }> = {
-  PROJECTOR: { label: 'Projector', icon: <Tv className="h-3.5 w-3.5" /> },
-  SMART_BOARD: { label: 'Smart Board', icon: <Monitor className="h-3.5 w-3.5" /> },
-  COMPUTER: { label: 'Computer', icon: <Monitor className="h-3.5 w-3.5" /> },
-  PRINTER: { label: 'Printer', icon: <Printer className="h-3.5 w-3.5" /> },
-  AC: { label: 'AC', icon: <Snowflake className="h-3.5 w-3.5" /> },
-  LIGHT: { label: 'Light', icon: <Lightbulb className="h-3.5 w-3.5" /> },
-  DOOR: { label: 'Door', icon: <DoorOpen className="h-3.5 w-3.5" /> },
-  PLUG: { label: 'Power Outlet', icon: <Plug className="h-3.5 w-3.5" /> },
-  CLEANLINESS: { label: 'Cleanliness', icon: <Sparkles className="h-3.5 w-3.5" /> },
-  SAFETY: { label: 'Safety', icon: <Shield className="h-3.5 w-3.5" /> },
-  OTHER: { label: 'Other', icon: <HelpCircle className="h-3.5 w-3.5" /> },
+const categoryIcons: Record<ReportCategory, React.ReactNode> = {
+  PROJECTOR: <Tv className="h-3.5 w-3.5" />,
+  SMART_BOARD: <Monitor className="h-3.5 w-3.5" />,
+  COMPUTER: <Monitor className="h-3.5 w-3.5" />,
+  PRINTER: <Printer className="h-3.5 w-3.5" />,
+  AC: <Snowflake className="h-3.5 w-3.5" />,
+  LIGHT: <Lightbulb className="h-3.5 w-3.5" />,
+  DOOR: <DoorOpen className="h-3.5 w-3.5" />,
+  PLUG: <Plug className="h-3.5 w-3.5" />,
+  CLEANLINESS: <Sparkles className="h-3.5 w-3.5" />,
+  SAFETY: <Shield className="h-3.5 w-3.5" />,
+  OTHER: <HelpCircle className="h-3.5 w-3.5" />,
 };
 
-const statusConfig: Record<ReportStatus, { label: string; bg: string; text: string; dot: string }> =
-  {
-    PENDING: { label: 'Pending', bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
-    IN_PROGRESS: {
-      label: 'In Progress',
-      bg: 'bg-blue-100',
-      text: 'text-blue-700',
-      dot: 'bg-blue-500',
-    },
-    RESOLVED: {
-      label: 'Resolved',
-      bg: 'bg-green-100',
-      text: 'text-green-700',
-      dot: 'bg-green-500',
-    },
-  };
+const statusVisuals: Record<ReportStatus, { bg: string; text: string; dot: string }> = {
+  PENDING: { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
+  IN_PROGRESS: { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' },
+  RESOLVED: { bg: 'bg-green-100', text: 'text-green-700', dot: 'bg-green-500' },
+};
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
@@ -107,8 +97,9 @@ function PendingReportRow({
   onAction: () => void;
   isPending: boolean;
 }) {
-  const cat = categoryMeta[report.category];
-  const status = statusConfig[report.status];
+  const t = useTranslations('IT');
+  const locale = useLocale();
+  const sv = statusVisuals[report.status];
 
   return (
     <div className="flex items-center gap-4 rounded-lg border border-gray-100 bg-gray-50 p-4">
@@ -117,8 +108,8 @@ function PendingReportRow({
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-semibold">{report.title}</span>
           <span className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
-            {cat.icon}
-            {cat.label}
+            {categoryIcons[report.category]}
+            {t(`categories.${report.category}` as `categories.${ReportCategory}`)}
           </span>
         </div>
         <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-xs">
@@ -132,7 +123,7 @@ function PendingReportRow({
           </span>
           <span className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
-            {new Date(report.createdAt).toLocaleDateString('en-US', {
+            {new Date(report.createdAt).toLocaleDateString(locale, {
               month: 'short',
               day: 'numeric',
             })}
@@ -142,10 +133,10 @@ function PendingReportRow({
 
       {/* Status badge */}
       <span
-        className={`hidden shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium sm:inline-flex ${status.bg} ${status.text}`}
+        className={`hidden shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium sm:inline-flex ${sv.bg} ${sv.text}`}
       >
-        <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-        {status.label}
+        <span className={`h-1.5 w-1.5 rounded-full ${sv.dot}`} />
+        {t(`statuses.${report.status}` as `statuses.${ReportStatus}`)}
       </span>
 
       {/* Actions */}
@@ -156,11 +147,15 @@ function PendingReportRow({
           disabled={isPending}
           onClick={onAction}
         >
-          {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Start Working'}
+          {isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            t('overview.startWorking')
+          )}
         </Button>
         <Link href={`/dashboard/it/reports/${report.id}`}>
           <Button size="sm" variant="outline" className="gap-1">
-            View <ArrowRight className="h-3.5 w-3.5" />
+            {t('overview.view')} <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </Link>
       </div>
@@ -171,6 +166,7 @@ function PendingReportRow({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ITOverviewPage() {
+  const t = useTranslations('IT');
   const { data: stats, isPending: statsPending } = useReportStats();
   const { data: pendingData, isPending: reportsPending } = useAllReports({
     status: 'PENDING',
@@ -184,37 +180,35 @@ export default function ITOverviewPage() {
     <div className="space-y-8">
       {/* Page heading */}
       <div>
-        <h2 className="text-2xl font-bold">IT Dashboard</h2>
-        <p className="text-muted-foreground text-sm">
-          Monitor and manage facility reports across all rooms
-        </p>
+        <h2 className="text-2xl font-bold">{t('overview.heading')}</h2>
+        <p className="text-muted-foreground text-sm">{t('overview.subtitle')}</p>
       </div>
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <StatCard
-          label="Total Reports"
+          label={t('overview.totalReports')}
           value={statsPending ? undefined : stats?.total}
           icon={FileText}
           borderColor="border-l-indigo-400"
           iconColor="text-indigo-500"
         />
         <StatCard
-          label="Pending"
+          label={t('overview.pending')}
           value={statsPending ? undefined : stats?.pending}
           icon={Clock}
           borderColor="border-l-amber-400"
           iconColor="text-amber-500"
         />
         <StatCard
-          label="In Progress"
+          label={t('overview.inProgress')}
           value={statsPending ? undefined : stats?.inProgress}
           icon={Loader2}
           borderColor="border-l-blue-400"
           iconColor="text-blue-500"
         />
         <StatCard
-          label="Resolved"
+          label={t('overview.resolved')}
           value={statsPending ? undefined : stats?.resolved}
           icon={CheckCircle2}
           borderColor="border-l-green-400"
@@ -225,10 +219,10 @@ export default function ITOverviewPage() {
       {/* Recent pending reports */}
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-semibold">Pending Reports</h3>
+          <h3 className="font-semibold">{t('overview.pendingReports')}</h3>
           <Link href="/dashboard/it/reports">
             <Button variant="outline" size="sm" className="gap-1.5">
-              View All <ArrowRight className="h-4 w-4" />
+              {t('overview.viewAll')} <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </div>
@@ -242,8 +236,8 @@ export default function ITOverviewPage() {
         ) : pendingReports.length === 0 ? (
           <Card className="flex flex-col items-center justify-center bg-white py-12 text-center">
             <CheckCircle2 className="mb-3 h-10 w-10 text-green-500" />
-            <p className="font-semibold">All caught up!</p>
-            <p className="text-muted-foreground mt-1 text-sm">No pending reports at the moment.</p>
+            <p className="font-semibold">{t('overview.allCaughtUp')}</p>
+            <p className="text-muted-foreground mt-1 text-sm">{t('overview.noPendingDesc')}</p>
           </Card>
         ) : (
           <div className="space-y-3">
@@ -270,9 +264,9 @@ export default function ITOverviewPage() {
                 <Clock className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="font-semibold">In Progress</p>
+                <p className="font-semibold">{t('overview.inProgress')}</p>
                 <p className="text-muted-foreground text-sm">
-                  {stats?.inProgress ?? '—'} reports being worked on
+                  {t('overview.inProgressCount', { count: stats?.inProgress ?? '—' })}
                 </p>
               </div>
               <ArrowRight className="text-muted-foreground ml-auto h-5 w-5" />
@@ -286,9 +280,9 @@ export default function ITOverviewPage() {
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="font-semibold">Resolved</p>
+                <p className="font-semibold">{t('overview.resolved')}</p>
                 <p className="text-muted-foreground text-sm">
-                  {stats?.resolved ?? '—'} reports completed
+                  {t('overview.resolvedCount', { count: stats?.resolved ?? '—' })}
                 </p>
               </div>
               <ArrowRight className="text-muted-foreground ml-auto h-5 w-5" />

@@ -231,5 +231,86 @@
       "linkedNode": "Linked Node",
       "none": "— None —"
     }
+  },
+  "IT": {
+    "sidebar": {
+      "title": "Dolani IT",
+      "role": "IT Staff",
+      "overview": "Overview",
+      "reports": "Reports",
+      "signOut": "Sign Out",
+      "signingOut": "Signing out…",
+      "itDashboard": "IT Dashboard",
+      "reportNumber": "Report #{id}"
+    },
+    "overview": {
+      "heading": "IT Dashboard",
+      "subtitle": "Monitor and manage facility reports across all rooms",
+      "totalReports": "Total Reports",
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "resolved": "Resolved",
+      "pendingReports": "Pending Reports",
+      "viewAll": "View All",
+      "allCaughtUp": "All caught up!",
+      "noPendingDesc": "No pending reports at the moment.",
+      "startWorking": "Start Working",
+      "view": "View",
+      "inProgressCount": "{count} reports being worked on",
+      "resolvedCount": "{count} reports completed"
+    },
+    "reports": {
+      "searchPlaceholder": "Search by title, room, professor…",
+      "allCategories": "All Categories",
+      "allStatus": "All",
+      "submittedBy": "Submitted by",
+      "resolvedBy": "Resolved by",
+      "resolvedOn": "on",
+      "startWorking": "Start Working",
+      "markResolved": "Mark as Resolved",
+      "collapse": "Collapse",
+      "expand": "Expand",
+      "failedLoad": "Failed to load reports.",
+      "refreshPage": "Please refresh the page.",
+      "noReports": "No reports found",
+      "noReportsYet": "No reports have been submitted yet.",
+      "adjustFilters": "Try adjusting your filters or search term."
+    },
+    "detail": {
+      "reportNotFound": "Report not found",
+      "reportNotFoundDesc": "This report may have been deleted or the ID is invalid.",
+      "backToReports": "Back to Reports",
+      "submitted": "Submitted",
+      "description": "Description",
+      "submittedByMember": "Report submitted by this faculty member",
+      "department": "Department",
+      "email": "Email",
+      "phone": "Phone",
+      "officeRoom": "Office Room",
+      "reportResolved": "Report Resolved",
+      "resolvedBy": "Resolved by",
+      "resolvedOn": "Resolved on",
+      "startWorking": "Start Working",
+      "markResolved": "Mark as Resolved",
+      "resolvedBtn": "Resolved"
+    },
+    "categories": {
+      "PROJECTOR": "Projector",
+      "SMART_BOARD": "Smart Board",
+      "COMPUTER": "Computer",
+      "PRINTER": "Printer",
+      "AC": "AC",
+      "LIGHT": "Light",
+      "DOOR": "Door",
+      "PLUG": "Power Outlet",
+      "CLEANLINESS": "Cleanliness",
+      "SAFETY": "Safety",
+      "OTHER": "Other"
+    },
+    "statuses": {
+      "PENDING": "Pending",
+      "IN_PROGRESS": "In Progress",
+      "RESOLVED": "Resolved"
+    }
   }
 }

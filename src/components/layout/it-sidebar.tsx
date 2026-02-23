@@ -5,21 +5,12 @@ import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUIStore } from '@/store/useUIStore';
 import { ChevronLeft, ChevronRight, FileText, LayoutDashboard, LogOut } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 
 import { getInitials } from '@/lib/get-initials';
 import { cn } from '@/lib/utils';
-
-const links = [
-  { href: '/dashboard/it', label: 'Overview', icon: LayoutDashboard, exact: true },
-  { href: '/dashboard/it/reports', label: 'Reports', icon: FileText, exact: false },
-];
-
-const segmentTitles: Record<string, string> = {
-  it: 'Overview',
-  reports: 'Reports',
-};
 
 export function ITSidebar() {
   const router = useRouter();
@@ -36,6 +27,13 @@ export function ITSidebar() {
     });
   };
 
+  const t = useTranslations('IT');
+
+  const links = [
+    { href: '/dashboard/it', label: t('sidebar.overview'), icon: LayoutDashboard, exact: true },
+    { href: '/dashboard/it/reports', label: t('sidebar.reports'), icon: FileText, exact: false },
+  ];
+
   const initials = user?.name ? getInitials(user.name) : '??';
 
   return (
@@ -47,7 +45,9 @@ export function ITSidebar() {
     >
       {/* Header */}
       <div className="border-border flex h-14 items-center justify-between border-b px-4">
-        {!isSidebarCollapsed && <h1 className="text-primary text-lg font-bold">Dolani IT</h1>}
+        {!isSidebarCollapsed && (
+          <h1 className="text-primary text-lg font-bold">{t('sidebar.title')}</h1>
+        )}
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className="ml-auto">
           {isSidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
         </Button>
@@ -61,9 +61,9 @@ export function ITSidebar() {
               {initials}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">{user?.name ?? 'IT Staff'}</p>
+              <p className="truncate text-sm font-semibold">{user?.name ?? t('sidebar.role')}</p>
               <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-                IT Staff
+                {t('sidebar.role')}
               </span>
             </div>
           </div>
@@ -110,7 +110,7 @@ export function ITSidebar() {
         >
           <LogOut className="h-5 w-5" />
           {!isSidebarCollapsed && (
-            <span>{logoutMutation.isPending ? 'Signing out…' : 'Sign Out'}</span>
+            <span>{logoutMutation.isPending ? t('sidebar.signingOut') : t('sidebar.signOut')}</span>
           )}
         </Button>
       </div>
@@ -120,17 +120,23 @@ export function ITSidebar() {
 
 export function ITHeader() {
   const pathname = usePathname();
+  const t = useTranslations('IT');
   const segments = pathname.split('/').filter(Boolean);
+
+  const segmentTitles: Record<string, string> = {
+    it: t('sidebar.overview'),
+    reports: t('sidebar.reports'),
+  };
 
   // last segment: could be 'it', 'reports', or a numeric id
   const last = segments[segments.length - 1] ?? 'it';
   const isNumeric = /^\d+$/.test(last);
 
-  let title = 'Overview';
+  let title = t('sidebar.overview');
   if (isNumeric) {
-    title = `Report #${last}`;
+    title = t('sidebar.reportNumber', { id: last });
   } else {
-    title = segmentTitles[last] ?? 'IT Dashboard';
+    title = segmentTitles[last] ?? t('sidebar.itDashboard');
   }
 
   return (
@@ -138,7 +144,7 @@ export function ITHeader() {
       <h2 className="text-primary text-lg font-semibold">{title}</h2>
       <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
         <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-        IT Staff
+        {t('sidebar.role')}
       </span>
     </header>
   );
