@@ -3,6 +3,7 @@ import type {
   Report,
   ReportListParams,
   ReportStats,
+  ReportWithRelations,
   UpdateReportStatusPayload,
 } from '@/types/faculty';
 
@@ -16,13 +17,13 @@ export const itApi = {
     return data;
   },
 
-  getAllReports: async (params: ReportListParams = {}): Promise<Paginated<Report>> => {
-    const { data } = await apiClient.get<Paginated<Report>>('it/reports', { params });
+  getAllReports: async (params: ReportListParams = {}): Promise<Paginated<ReportWithRelations>> => {
+    const { data } = await apiClient.get<Paginated<ReportWithRelations>>('it/reports', { params });
     return data;
   },
 
-  getReportById: async (id: number): Promise<Report> => {
-    const { data } = await apiClient.get<Report>(`it/reports/${id}`);
+  getReportById: async (id: number): Promise<ReportWithRelations> => {
+    const { data } = await apiClient.get<ReportWithRelations>(`it/reports/${id}`);
     return data;
   },
 

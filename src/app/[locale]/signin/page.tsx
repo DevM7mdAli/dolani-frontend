@@ -41,7 +41,14 @@ export default function SignInPage(): JSX.Element {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      const dest = user.role === 'ADMIN' ? '/dashboard/admin' : '/dashboard/doctors';
+      const dest =
+        user.role === 'ADMIN'
+          ? '/dashboard/admin'
+          : user.role === 'IT'
+            ? '/dashboard/it'
+            : user.role === 'SECURITY'
+              ? '/dashboard/security'
+              : '/dashboard/doctors';
       router.replace(dest);
     }
   }, [isAuthenticated, user, router]);
@@ -50,7 +57,15 @@ export default function SignInPage(): JSX.Element {
     loginMutation.mutate(data, {
       onSuccess: (response) => {
         toast.success(`Welcome back, ${response.user.name}!`);
-        const dest = response.user.role === 'ADMIN' ? '/dashboard/admin' : '/dashboard/doctors';
+        const role = response.user.role;
+        const dest =
+          role === 'ADMIN'
+            ? '/dashboard/admin'
+            : role === 'IT'
+              ? '/dashboard/it'
+              : role === 'SECURITY'
+                ? '/dashboard/security'
+                : '/dashboard/doctors';
         router.push(dest);
       },
       onError: (error) => {

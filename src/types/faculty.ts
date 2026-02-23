@@ -101,6 +101,27 @@ export interface Report {
   resolved_at?: string | null;
 }
 
+// ─── Relation Shapes (IT endpoints) ──────────────────────────────────────────
+
+export interface ReportProfessor {
+  id: number;
+  full_name: string;
+  email: string;
+  phone_number?: string | null;
+  department: { id: number; name: string };
+  office?: { id: number; name: string; room_number: string | null } | null;
+}
+
+export interface ReportResolvedBy {
+  id: number;
+  user: { name: string; email: string };
+}
+
+export interface ReportWithRelations extends Report {
+  professor: ReportProfessor;
+  resolved_by: ReportResolvedBy | null;
+}
+
 export interface ReportStats {
   total: number;
   pending: number;
