@@ -19,7 +19,15 @@ import {
 
 import { facultyApi } from '@/lib/api/faculty';
 
-const allDays: DayOfWeek[] = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY'];
+const allDays: DayOfWeek[] = [
+  'SUNDAY',
+  'MONDAY',
+  'TUESDAY',
+  'WEDNESDAY',
+  'THURSDAY',
+  'FRIDAY',
+  'SATURDAY',
+];
 
 const dayLabels: Record<DayOfWeek, string> = {
   SUNDAY: 'Sunday',
@@ -27,6 +35,8 @@ const dayLabels: Record<DayOfWeek, string> = {
   TUESDAY: 'Tuesday',
   WEDNESDAY: 'Wednesday',
   THURSDAY: 'Thursday',
+  FRIDAY: 'Friday',
+  SATURDAY: 'Saturday',
 };
 
 interface EditRow {

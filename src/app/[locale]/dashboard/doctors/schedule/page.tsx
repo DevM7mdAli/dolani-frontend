@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import type { DayOfWeek, TeachingSlot } from '@/types/faculty';
-import { Clock, MapPin, Pencil, Plus, Save, Trash2, Users, X } from 'lucide-react';
+import { useSchedule, useUpsertSchedule } from '@/hooks/useFaculty';
+import type { DayOfWeek } from '@/types/faculty';
+import { Clock, Loader2, MapPin, Pencil, Plus, Save, Trash2, Users, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -22,54 +23,6 @@ const dayLabels: Record<DayOfWeek, string> = {
 /* ── Work-week days to display ── */
 const weekDays: DayOfWeek[] = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY'];
 
-/* ── Mock data (replace with API call when backend is ready) ── */
-const mockSchedule: TeachingSlot[] = [
-  {
-    id: 1,
-    course_code: 'CS201',
-    course_name: 'Data Structures',
-    course_name_ar: 'هياكل البيانات',
-    day: 'SUNDAY',
-    start_time: '08:00',
-    end_time: '09:30',
-    room: 'Room A-201',
-    student_count: 45,
-  },
-  {
-    id: 2,
-    course_code: 'CS301',
-    course_name: 'Algorithms',
-    course_name_ar: 'الخوارزميات',
-    day: 'MONDAY',
-    start_time: '10:00',
-    end_time: '11:30',
-    room: 'Room B-101',
-    student_count: 52,
-  },
-  {
-    id: 3,
-    course_code: 'CS201',
-    course_name: 'Data Structures',
-    course_name_ar: 'هياكل البيانات',
-    day: 'TUESDAY',
-    start_time: '08:00',
-    end_time: '09:30',
-    room: 'Room A-201',
-    student_count: 45,
-  },
-  {
-    id: 4,
-    course_code: 'CS301',
-    course_name: 'Algorithms',
-    course_name_ar: 'الخوارزميات',
-    day: 'WEDNESDAY',
-    start_time: '10:00',
-    end_time: '11:30',
-    room: 'Room B-101',
-    student_count: 52,
-  },
-];
-
 /* ── Edit row type ── */
 interface EditSlot {
   course_code: string;
@@ -86,18 +39,21 @@ const inputClass =
   'h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/30';
 
 export default function SchedulePage() {
+  const { data: schedule = [], isPending, isError } = useSchedule();
+  const upsertSchedule = useUpsertSchedule();
+
   const [isEditing, setIsEditing] = useState(false);
   const [editSlots, setEditSlots] = useState<EditSlot[]>([]);
 
   /* Group slots by day */
   const slotsByDay = weekDays.map((day) => ({
     day,
-    slots: mockSchedule.filter((s) => s.day === day),
+    slots: schedule.filter((s) => s.day === day),
   }));
 
   const handleEditClick = () => {
     setEditSlots(
-      mockSchedule.map((s) => ({
+      schedule.map((s) => ({
         course_code: s.course_code,
         course_name: s.course_name,
         course_name_ar: s.course_name_ar ?? '',
@@ -111,9 +67,30 @@ export default function SchedulePage() {
     setIsEditing(true);
   };
 
+  // Close edit mode after a successful save
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (upsertSchedule.isSuccess) setIsEditing(false);
+  }, [upsertSchedule.isSuccess]);
+
   const handleCancel = () => {
     setIsEditing(false);
     setEditSlots([]);
+  };
+
+  const handleSave = () => {
+    upsertSchedule.mutate({
+      slots: editSlots.map((s) => ({
+        course_code: s.course_code,
+        course_name: s.course_name,
+        course_name_ar: s.course_name_ar || undefined,
+        day: s.day,
+        start_time: s.start_time,
+        end_time: s.end_time,
+        room: s.room,
+        student_count: Number(s.student_count),
+      })),
+    });
   };
 
   const updateSlot = (index: number, field: keyof EditSlot, value: string) => {
@@ -146,6 +123,21 @@ export default function SchedulePage() {
     slots: editSlots.map((s, i) => ({ ...s, globalIndex: i })).filter((s) => s.day === day),
   }));
 
+  if (isError) {
+    return (
+      <div className="flex justify-center pt-10">
+        <div className="w-full max-w-4xl">
+          <Card className="flex flex-col items-center justify-center bg-white py-20 text-center">
+            <p className="text-destructive font-semibold">Failed to load schedule.</p>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Please refresh the page and try again.
+            </p>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex justify-center pt-10">
       <div className="w-full max-w-4xl">
@@ -159,8 +151,13 @@ export default function SchedulePage() {
                 size="sm"
                 className="gap-2 rounded-sm"
                 onClick={handleEditClick}
+                disabled={isPending}
               >
-                <Pencil className="h-4 w-4" />
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Pencil className="h-4 w-4" />
+                )}
                 Edit Schedule
               </Button>
             )}
@@ -354,13 +351,15 @@ export default function SchedulePage() {
                 <Button
                   size="sm"
                   className="gap-1.5 bg-amber-400 text-white hover:bg-amber-500"
-                  onClick={() => {
-                    // TODO: Call API when backend is ready
-                    setIsEditing(false);
-                  }}
+                  onClick={handleSave}
+                  disabled={upsertSchedule.isPending}
                 >
-                  <Save className="h-4 w-4" />
-                  Save Changes
+                  {upsertSchedule.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  {upsertSchedule.isPending ? 'Saving…' : 'Save Changes'}
                 </Button>
               </div>
             </div>

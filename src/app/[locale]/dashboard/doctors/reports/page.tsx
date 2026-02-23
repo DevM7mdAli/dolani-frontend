@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { useCreateReport, useMyReports } from '@/hooks/useFaculty';
 import type { Report, ReportCategory, ReportStatus } from '@/types/faculty';
 import {
   AlertTriangle,
@@ -12,6 +13,7 @@ import {
   FileText,
   HelpCircle,
   Lightbulb,
+  Loader2,
   MapPin,
   Monitor,
   Plug,
@@ -29,51 +31,6 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-/* ── Mock data ── */
-const mockReports: Report[] = [
-  {
-    id: 1,
-    title: 'Projector not working',
-    description:
-      'The ceiling-mounted projector in Room A11-201 has stopped displaying. The lamp turns on but shows a blank blue screen. Tried multiple HDMI cables.',
-    category: 'PROJECTOR',
-    status: 'PENDING',
-    room: 'A11-201',
-    created_at: '2026-02-15T10:30:00Z',
-  },
-  {
-    id: 2,
-    title: 'AC blowing warm air',
-    description:
-      'The AC unit in my office has been blowing warm air for the past 3 days. Temperature is uncomfortable for office hours.',
-    category: 'AC',
-    status: 'IN_PROGRESS',
-    room: 'A11-305',
-    created_at: '2026-02-12T08:15:00Z',
-  },
-  {
-    id: 3,
-    title: 'Broken door lock',
-    description:
-      'The electronic card reader on Lab B-102 is not recognizing faculty key cards. Had to prop the door open during class.',
-    category: 'DOOR',
-    status: 'RESOLVED',
-    room: 'B-102',
-    created_at: '2026-02-05T14:00:00Z',
-    resolved_at: '2026-02-08T11:00:00Z',
-  },
-  {
-    id: 4,
-    title: 'Broken power outlet',
-    description:
-      'Two of the power outlets near the front desk are not working. Students cannot charge their laptops.',
-    category: 'PLUG',
-    status: 'PENDING',
-    room: 'A11-108',
-    created_at: '2026-02-16T09:45:00Z',
-  },
-];
 
 /* ── Category config ── */
 type CategoryGroup = { label: string; items: ReportCategory[] };
@@ -129,8 +86,17 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
   const [category, setCategory] = useState<ReportCategory>('PROJECTOR');
   const [room, setRoom] = useState('');
   const [description, setDescription] = useState('');
+  const createReport = useCreateReport();
 
   const canSubmit = title.trim() && room.trim() && description.trim();
+
+  const handleSubmit = () => {
+    if (!canSubmit) return;
+    createReport.mutate(
+      { title: title.trim(), description: description.trim(), category, room: room.trim() },
+      { onSuccess: onSubmit },
+    );
+  };
 
   return (
     <Card className="bg-white p-6">
@@ -224,13 +190,20 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
           </Button>
           <Button
             className="bg-amber-500 text-white hover:bg-amber-600"
-            disabled={!canSubmit}
-            onClick={() => {
-              if (canSubmit) onSubmit();
-            }}
+            disabled={!canSubmit || createReport.isPending}
+            onClick={handleSubmit}
           >
-            <Send className="mr-1.5 h-4 w-4" />
-            Submit Report
+            {createReport.isPending ? (
+              <>
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                Submitting…
+              </>
+            ) : (
+              <>
+                <Send className="mr-1.5 h-4 w-4" />
+                Submit Report
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -264,7 +237,7 @@ function ReportCard({ report }: { report: Report }) {
             </span>
             <span className="inline-flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5" />
-              {formatDate(report.created_at)}
+              {formatDate(report.createdAt)}
             </span>
           </div>
 
@@ -295,10 +268,39 @@ function ReportCard({ report }: { report: Report }) {
   );
 }
 
+/* ── Loading skeleton ── */
+function ReportSkeleton() {
+  return (
+    <Card className="bg-white p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 space-y-2">
+          <div className="h-4 w-1/3 animate-pulse rounded bg-gray-100" />
+          <div className="h-3 w-1/2 animate-pulse rounded bg-gray-100" />
+        </div>
+        <div className="h-6 w-20 animate-pulse rounded-full bg-gray-100" />
+      </div>
+    </Card>
+  );
+}
+
 /* ── Page ── */
 export default function ReportsPage() {
   const [showForm, setShowForm] = useState(false);
-  const [reports] = useState<Report[]>(mockReports);
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'IN_PROGRESS' | 'RESOLVED'>(
+    'ALL',
+  );
+
+  const { data, isPending, isError } = useMyReports(
+    statusFilter !== 'ALL' ? { status: statusFilter } : {},
+  );
+  const reports = data?.data ?? [];
+
+  const statusTabs: { label: string; value: typeof statusFilter }[] = [
+    { label: 'All', value: 'ALL' },
+    { label: 'Pending', value: 'PENDING' },
+    { label: 'In Progress', value: 'IN_PROGRESS' },
+    { label: 'Resolved', value: 'RESOLVED' },
+  ];
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
@@ -321,26 +323,70 @@ export default function ReportsPage() {
         )}
       </div>
 
+      {/* Status filter tabs */}
+      {!showForm && (
+        <div className="flex gap-2">
+          {statusTabs.map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => setStatusFilter(tab.value)}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                statusFilter === tab.value
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* New Report Form */}
       {showForm && (
         <NewReportForm onCancel={() => setShowForm(false)} onSubmit={() => setShowForm(false)} />
       )}
 
-      {/* Reports List */}
-      {reports.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center bg-white py-16 text-center">
-          <AlertTriangle className="text-muted-foreground mb-3 h-12 w-12" />
-          <h3 className="text-lg font-semibold">No reports submitted yet</h3>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Click &quot;New Report&quot; to report a room or facility issue.
-          </p>
+      {/* Error state */}
+      {isError && (
+        <Card className="flex flex-col items-center justify-center bg-white py-12 text-center">
+          <AlertTriangle className="text-destructive mb-3 h-10 w-10" />
+          <p className="font-semibold">Failed to load reports.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Please refresh the page.</p>
         </Card>
-      ) : (
+      )}
+
+      {/* Loading skeletons */}
+      {isPending && (
         <div className="space-y-3">
-          {reports.map((report) => (
-            <ReportCard key={report.id} report={report} />
+          {Array.from({ length: 3 }).map((_, i) => (
+            <ReportSkeleton key={i} />
           ))}
         </div>
+      )}
+
+      {/* Reports List */}
+      {!isPending && !isError && (
+        <>
+          {reports.length === 0 ? (
+            <Card className="flex flex-col items-center justify-center bg-white py-16 text-center">
+              <AlertTriangle className="text-muted-foreground mb-3 h-12 w-12" />
+              <h3 className="text-lg font-semibold">No reports found</h3>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {statusFilter === 'ALL'
+                  ? 'Click “New Report” to report a room or facility issue.'
+                  : `No ${statusFilter.toLowerCase().replace('_', ' ')} reports.`}
+              </p>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {reports.map((report) => (
+                <ReportCard key={report.id} report={report} />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
