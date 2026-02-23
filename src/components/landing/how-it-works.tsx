@@ -112,13 +112,13 @@ export function HowItWorks({ data }: { data: LandingPage['howItWorks'] }) {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="relative flex h-[500px] w-full items-center justify-center"
+            className="relative flex h-auto w-full items-center justify-center md:h-125"
           >
             {/* Background Decoration */}
             <div className="bg-accent/50 absolute inset-0 scale-95 -rotate-6 rounded-[3rem]"></div>
 
             {/* Main Card */}
-            <div className="relative h-[450px] w-[400px] rounded-[2rem] border border-slate-100 bg-white p-4 shadow-2xl">
+            <div className="relative h-auto w-full max-w-100 rounded-4xl border border-slate-100 bg-white p-4 shadow-2xl md:h-112.5 md:w-100">
               {/* Inner Screen Area */}
               {data.whyChooseImage ? (
                 <Image
@@ -127,9 +127,10 @@ export function HowItWorks({ data }: { data: LandingPage['howItWorks'] }) {
                       ? data.whyChooseImage
                       : (data.whyChooseImage as any).url || ''
                   }
-                  className="h-full w-full rounded-2xl object-cover"
+                  className="h-auto w-full rounded-2xl object-contain"
                   width={400}
                   height={450}
+                  sizes="(max-width: 768px) 100vw, 400px"
                   alt="Phone mockup"
                 />
               ) : (
@@ -146,14 +147,14 @@ export function HowItWorks({ data }: { data: LandingPage['howItWorks'] }) {
               )}
 
               {/* Floating Badges */}
-              <div className="absolute -top-6 -right-6 rounded-xl border border-slate-100 bg-white p-3 shadow-xl">
+              <div className="absolute -top-3 right-3 rounded-xl border border-slate-100 bg-white p-3 shadow-xl md:-top-6 md:-right-6">
                 <div className="text-primary text-2xl font-bold">{data.statBadge1Value}</div>
                 <div className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
                   {data.statBadge1Label}
                 </div>
               </div>
 
-              <div className="absolute -bottom-6 -left-6 rounded-xl border border-slate-100 bg-white p-3 shadow-xl">
+              <div className="absolute bottom-3 left-3 rounded-xl border border-slate-100 bg-white p-3 shadow-xl md:-bottom-6 md:-left-6">
                 <div className="text-primary text-2xl font-bold">{data.statBadge2Value}</div>
                 <div className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
                   {data.statBadge2Label}

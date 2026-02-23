@@ -35,6 +35,7 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
     schemaName: 'dolani-cms',
+    push: false,
   }),
   plugins: [],
 });
