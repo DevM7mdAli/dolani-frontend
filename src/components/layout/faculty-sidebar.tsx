@@ -220,7 +220,7 @@ export function FacultyHeader() {
         {/* Language Toggle Icon */}
         <button
           onClick={() => switchLocale(locale === 'en' ? 'ar' : 'en')}
-          title={locale === 'en' ? 'Switch to Arabic' : 'Switch to English'}
+          title={locale === 'en' ? 'تغيير للعربية' : 'Switch to English'}
           className="text-muted-foreground hover:text-primary transition-colors"
         >
           <Globe className="h-5 w-5" />

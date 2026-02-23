@@ -4,8 +4,8 @@ import { useLogout } from '@/hooks/useAuth';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUIStore } from '@/store/useUIStore';
-import { ChevronLeft, ChevronRight, FileText, LayoutDashboard, LogOut } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { ChevronLeft, ChevronRight, FileText, Globe, LayoutDashboard, LogOut } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 
@@ -119,7 +119,9 @@ export function ITSidebar() {
 }
 
 export function ITHeader() {
+  const router = useRouter();
   const pathname = usePathname();
+  const locale = useLocale();
   const t = useTranslations('IT');
   const segments = pathname.split('/').filter(Boolean);
 
@@ -139,13 +141,26 @@ export function ITHeader() {
     title = segmentTitles[last] ?? t('sidebar.itDashboard');
   }
 
+  const switchLocale = (newLocale: 'en' | 'ar') => {
+    router.replace(pathname, { locale: newLocale });
+  };
+
   return (
     <header className="border-border flex h-14 items-center justify-between border-b bg-white px-6 shadow-sm">
       <h2 className="text-primary text-lg font-semibold">{title}</h2>
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-        <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-        {t('sidebar.role')}
-      </span>
+      <div className="flex items-center gap-4">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+          <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+          {t('sidebar.role')}
+        </span>
+        <button
+          onClick={() => switchLocale(locale === 'en' ? 'ar' : 'en')}
+          title={locale === 'en' ? 'تغيير للعربية' : 'Switch to English'}
+          className="text-muted-foreground hover:text-primary transition-colors"
+        >
+          <Globe className="h-5 w-5" />
+        </button>
+      </div>
     </header>
   );
 }
