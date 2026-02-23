@@ -20,7 +20,7 @@ export interface AuthUser {
   email: string;
   username: string;
   name: string;
-  role: 'ADMIN' | 'FACULTY';
+  role: 'ADMIN' | 'FACULTY' | 'IT' | 'SECURITY';
 }
 
 export interface AuthResponse {
