@@ -4,28 +4,32 @@ import { useLogout } from '@/hooks/useAuth';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUIStore } from '@/store/useUIStore';
+import type { ProfessorStatus } from '@/types/faculty';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
   ChevronLeft,
   ChevronRight,
   Clock,
   FileText,
+  Globe,
   LogOut,
-  Settings,
   User,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 import { facultyApi } from '@/lib/api/faculty';
 import { getInitials } from '@/lib/get-initials';
 import { cn } from '@/lib/utils';
-
-import type { ProfessorStatus } from '@/types/faculty';
 
 export function FacultySidebar() {
   const t = useTranslations('Faculty');
@@ -68,7 +72,6 @@ export function FacultySidebar() {
     { href: '/dashboard/doctors/office-hours', label: t('officeHours'), icon: Clock },
     { href: '/dashboard/doctors/schedule', label: t('schedule'), icon: Calendar },
     { href: '/dashboard/doctors/reports', label: t('reports'), icon: FileText },
-    { href: '/dashboard/doctors/settings', label: t('settings'), icon: Settings },
   ];
 
   return (
@@ -187,14 +190,15 @@ const segmentKeys: Record<string, string> = {
   'office-hours': 'officeHours',
   schedule: 'schedule',
   reports: 'reports',
-  settings: 'settings',
 };
 
 export function FacultyHeader() {
   const t = useTranslations('Faculty');
+  const router = useRouter();
+  const pathname = usePathname();
+  const locale = useLocale();
   const segment = usePathname().split('/').pop() ?? 'profile';
 
-  // Re-use the cached profile query — no extra network call
   const { data: profile } = useQuery({
     queryKey: ['faculty', 'profile'],
     queryFn: facultyApi.getMyProfile,
@@ -203,25 +207,37 @@ export function FacultyHeader() {
   const status = profile?.status ?? 'AVAILABLE';
   const isAvailable = status === 'AVAILABLE';
 
+  const switchLocale = (newLocale: 'en' | 'ar') => {
+    router.replace(pathname, { locale: newLocale });
+  };
+
   return (
     <header className="border-border flex h-14 items-center justify-between border-b bg-white px-6 shadow-sm">
       <h2 className="text-primary text-lg font-semibold">
         {t(segmentKeys[segment] ?? 'myProfile')}
       </h2>
-      {/* Read-only status badge — change status via the sidebar */}
-      <div
-        className={cn(
-          'flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium',
-          isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700',
-        )}
-      >
-        <span
+      <div className="flex items-center gap-4">
+        {/* Language Toggle Icon */}
+        <button
+          onClick={() => switchLocale(locale === 'en' ? 'ar' : 'en')}
+          title={locale === 'en' ? 'Switch to Arabic' : 'Switch to English'}
+          className="text-muted-foreground hover:text-primary transition-colors"
+        >
+          <Globe className="h-5 w-5" />
+        </button>
+
+        {/* Status Badge */}
+        <div
           className={cn(
-            'h-2 w-2 rounded-full',
-            isAvailable ? 'bg-green-500' : 'bg-red-500',
+            'flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium',
+            isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700',
           )}
-        />
-        {t(isAvailable ? 'available' : 'notAvailable')}
+        >
+          <span
+            className={cn('h-2 w-2 rounded-full', isAvailable ? 'bg-green-500' : 'bg-red-500')}
+          />
+          {t(isAvailable ? 'available' : 'notAvailable')}
+        </div>
       </div>
     </header>
   );

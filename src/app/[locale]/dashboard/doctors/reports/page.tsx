@@ -26,6 +26,7 @@ import {
   Tv,
   X,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -33,44 +34,41 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 /* ── Category config ── */
-type CategoryGroup = { label: string; items: ReportCategory[] };
+type CategoryGroup = { key: string; items: ReportCategory[] };
 
-const categoryGroups: CategoryGroup[] = [
-  { label: 'Tech', items: ['PROJECTOR', 'SMART_BOARD', 'COMPUTER', 'PRINTER'] },
-  { label: 'Facility', items: ['AC', 'LIGHT', 'DOOR', 'PLUG'] },
-  { label: 'General', items: ['CLEANLINESS', 'SAFETY', 'OTHER'] },
+const categoryGroupsData: CategoryGroup[] = [
+  { key: 'tech', items: ['PROJECTOR', 'SMART_BOARD', 'COMPUTER', 'PRINTER'] },
+  { key: 'facility', items: ['AC', 'LIGHT', 'DOOR', 'PLUG'] },
+  { key: 'general', items: ['CLEANLINESS', 'SAFETY', 'OTHER'] },
 ];
 
-const categoryMeta: Record<ReportCategory, { label: string; icon: React.ReactNode }> = {
-  PROJECTOR: { label: 'Projector', icon: <Tv className="h-3.5 w-3.5" /> },
-  SMART_BOARD: { label: 'Smart Board', icon: <Monitor className="h-3.5 w-3.5" /> },
-  COMPUTER: { label: 'Computer', icon: <Monitor className="h-3.5 w-3.5" /> },
-  PRINTER: { label: 'Printer', icon: <Printer className="h-3.5 w-3.5" /> },
-  AC: { label: 'AC', icon: <Snowflake className="h-3.5 w-3.5" /> },
-  LIGHT: { label: 'Light', icon: <Lightbulb className="h-3.5 w-3.5" /> },
-  DOOR: { label: 'Door', icon: <DoorOpen className="h-3.5 w-3.5" /> },
-  PLUG: { label: 'Power Outlet', icon: <Plug className="h-3.5 w-3.5" /> },
-  CLEANLINESS: { label: 'Cleanliness', icon: <Sparkles className="h-3.5 w-3.5" /> },
-  SAFETY: { label: 'Safety', icon: <Shield className="h-3.5 w-3.5" /> },
-  OTHER: { label: 'Other', icon: <HelpCircle className="h-3.5 w-3.5" /> },
+const categoryIcons: Record<ReportCategory, React.ReactNode> = {
+  PROJECTOR: <Tv className="h-3.5 w-3.5" />,
+  SMART_BOARD: <Monitor className="h-3.5 w-3.5" />,
+  COMPUTER: <Monitor className="h-3.5 w-3.5" />,
+  PRINTER: <Printer className="h-3.5 w-3.5" />,
+  AC: <Snowflake className="h-3.5 w-3.5" />,
+  LIGHT: <Lightbulb className="h-3.5 w-3.5" />,
+  DOOR: <DoorOpen className="h-3.5 w-3.5" />,
+  PLUG: <Plug className="h-3.5 w-3.5" />,
+  CLEANLINESS: <Sparkles className="h-3.5 w-3.5" />,
+  SAFETY: <Shield className="h-3.5 w-3.5" />,
+  OTHER: <HelpCircle className="h-3.5 w-3.5" />,
 };
 
-const statusConfig: Record<ReportStatus, { label: string; bg: string; text: string; dot: string }> =
-  {
-    PENDING: { label: 'Pending', bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
-    IN_PROGRESS: {
-      label: 'In Progress',
-      bg: 'bg-blue-100',
-      text: 'text-blue-700',
-      dot: 'bg-blue-500',
-    },
-    RESOLVED: {
-      label: 'Resolved',
-      bg: 'bg-green-100',
-      text: 'text-green-700',
-      dot: 'bg-green-500',
-    },
-  };
+const statusStyles: Record<ReportStatus, { bg: string; text: string; dot: string }> = {
+  PENDING: { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
+  IN_PROGRESS: {
+    bg: 'bg-blue-100',
+    text: 'text-blue-700',
+    dot: 'bg-blue-500',
+  },
+  RESOLVED: {
+    bg: 'bg-green-100',
+    text: 'text-green-700',
+    dot: 'bg-green-500',
+  },
+};
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -82,6 +80,7 @@ function formatDate(iso: string) {
 
 /* ── New Report Form ── */
 function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit: () => void }) {
+  const t = useTranslations('Faculty');
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<ReportCategory>('PROJECTOR');
   const [room, setRoom] = useState('');
@@ -102,18 +101,18 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
     <Card className="bg-white p-6">
       <div className="mb-5 flex items-center gap-2">
         <FileText className="text-primary h-5 w-5" />
-        <h3 className="text-lg font-bold">New Report</h3>
+        <h3 className="text-lg font-bold">{t('reportsPage.newReport')}</h3>
       </div>
 
       <div className="space-y-5">
         {/* Title */}
         <div>
           <Label htmlFor="report-title" className="mb-1.5 block text-sm font-medium">
-            Title
+            {t('reportsPage.titleLabel')}
           </Label>
           <Input
             id="report-title"
-            placeholder="Brief description of the issue"
+            placeholder={t('reportsPage.titlePlaceholder')}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -121,16 +120,16 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
 
         {/* Category — grouped */}
         <div>
-          <Label className="mb-2 block text-sm font-medium">Category</Label>
+          <Label className="mb-2 block text-sm font-medium">{t('reportsPage.category')}</Label>
           <div className="space-y-3">
-            {categoryGroups.map((group) => (
-              <div key={group.label}>
+            {categoryGroupsData.map((group) => (
+              <div key={group.key}>
                 <p className="mb-1.5 text-xs font-semibold tracking-wide text-gray-400 uppercase">
-                  {group.label}
+                  {t(`reportsPage.categoryGroups.${group.key}`)}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {group.items.map((cat) => {
-                    const meta = categoryMeta[cat];
+                    const icon = categoryIcons[cat];
                     const selected = category === cat;
                     return (
                       <button
@@ -143,8 +142,8 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
                             : 'border-gray-200 text-gray-600 hover:border-gray-300'
                         }`}
                       >
-                        {meta.icon}
-                        {meta.label}
+                        {icon}
+                        {t(`reportsPage.categories.${cat}`)}
                       </button>
                     );
                   })}
@@ -157,11 +156,11 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
         {/* Room */}
         <div>
           <Label htmlFor="report-room" className="mb-1.5 block text-sm font-medium">
-            Room
+            {t('reportsPage.roomLabel')}
           </Label>
           <Input
             id="report-room"
-            placeholder="e.g., A11-201"
+            placeholder={t('reportsPage.roomPlaceholder')}
             value={room}
             onChange={(e) => setRoom(e.target.value)}
           />
@@ -170,12 +169,12 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
         {/* Description */}
         <div>
           <Label htmlFor="report-description" className="mb-1.5 block text-sm font-medium">
-            Description
+            {t('reportsPage.description')}
           </Label>
           <textarea
             id="report-description"
             rows={4}
-            placeholder="Describe the issue in detail..."
+            placeholder={t('reportsPage.descriptionPlaceholder')}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="border-input bg-background placeholder:text-muted-foreground w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none"
@@ -186,7 +185,7 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
         <div className="flex items-center justify-end gap-3 pt-1">
           <Button variant="outline" onClick={onCancel}>
             <X className="mr-1.5 h-4 w-4" />
-            Cancel
+            {t('reportsPage.cancelBtn')}
           </Button>
           <Button
             className="bg-amber-500 text-white hover:bg-amber-600"
@@ -201,7 +200,7 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
             ) : (
               <>
                 <Send className="mr-1.5 h-4 w-4" />
-                Submit Report
+                {t('reportsPage.submitReport')}
               </>
             )}
           </Button>
@@ -213,9 +212,10 @@ function NewReportForm({ onCancel, onSubmit }: { onCancel: () => void; onSubmit:
 
 /* ── Report Card ── */
 function ReportCard({ report }: { report: Report }) {
+  const t = useTranslations('Faculty');
   const [expanded, setExpanded] = useState(false);
-  const status = statusConfig[report.status];
-  const meta = categoryMeta[report.category];
+  const status = statusStyles[report.status];
+  const icon = categoryIcons[report.category];
 
   return (
     <Card className="bg-white p-5 transition-shadow hover:shadow-md">
@@ -225,8 +225,8 @@ function ReportCard({ report }: { report: Report }) {
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="font-semibold">{report.title}</h4>
             <span className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-700">
-              {meta.icon}
-              {meta.label}
+              {icon}
+              {t(`reportsPage.categories.${report.category}`)}
             </span>
           </div>
 
@@ -253,7 +253,7 @@ function ReportCard({ report }: { report: Report }) {
             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${status.bg} ${status.text}`}
           >
             <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-            {status.label}
+            {t(`reportsPage.statuses.${report.status}`)}
           </span>
           <button
             type="button"
@@ -285,6 +285,7 @@ function ReportSkeleton() {
 
 /* ── Page ── */
 export default function ReportsPage() {
+  const t = useTranslations('Faculty');
   const [showForm, setShowForm] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'IN_PROGRESS' | 'RESOLVED'>(
     'ALL',
@@ -296,10 +297,10 @@ export default function ReportsPage() {
   const reports = data?.data ?? [];
 
   const statusTabs: { label: string; value: typeof statusFilter }[] = [
-    { label: 'All', value: 'ALL' },
-    { label: 'Pending', value: 'PENDING' },
-    { label: 'In Progress', value: 'IN_PROGRESS' },
-    { label: 'Resolved', value: 'RESOLVED' },
+    { label: t('reportsPage.allReports'), value: 'ALL' },
+    { label: t('reportsPage.statuses.PENDING'), value: 'PENDING' },
+    { label: t('reportsPage.statuses.IN_PROGRESS'), value: 'IN_PROGRESS' },
+    { label: t('reportsPage.statuses.RESOLVED'), value: 'RESOLVED' },
   ];
 
   return (
@@ -307,10 +308,8 @@ export default function ReportsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Room Reports</h2>
-          <p className="text-muted-foreground text-sm">
-            Report and track facility issues in your rooms
-          </p>
+          <h2 className="text-2xl font-bold">{t('reportsPage.roomReports')}</h2>
+          <p className="text-muted-foreground text-sm">{t('reportsPage.subtitle')}</p>
         </div>
         {!showForm && (
           <Button
@@ -318,7 +317,7 @@ export default function ReportsPage() {
             onClick={() => setShowForm(true)}
           >
             <Plus className="mr-1.5 h-4 w-4" />
-            New Report
+            {t('reportsPage.newReportBtn')}
           </Button>
         )}
       </div>
@@ -372,7 +371,7 @@ export default function ReportsPage() {
           {reports.length === 0 ? (
             <Card className="flex flex-col items-center justify-center bg-white py-16 text-center">
               <AlertTriangle className="text-muted-foreground mb-3 h-12 w-12" />
-              <h3 className="text-lg font-semibold">No reports found</h3>
+              <h3 className="text-lg font-semibold">{t('reportsPage.noReports')}</h3>
               <p className="text-muted-foreground mt-1 text-sm">
                 {statusFilter === 'ALL'
                   ? 'Click “New Report” to report a room or facility issue.'

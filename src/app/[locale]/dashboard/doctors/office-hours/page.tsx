@@ -5,6 +5,7 @@ import { useState } from 'react';
 import type { DayOfWeek } from '@/types/faculty';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Clock, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -29,16 +30,6 @@ const allDays: DayOfWeek[] = [
   'SATURDAY',
 ];
 
-const dayLabels: Record<DayOfWeek, string> = {
-  SUNDAY: 'Sunday',
-  MONDAY: 'Monday',
-  TUESDAY: 'Tuesday',
-  WEDNESDAY: 'Wednesday',
-  THURSDAY: 'Thursday',
-  FRIDAY: 'Friday',
-  SATURDAY: 'Saturday',
-};
-
 interface EditRow {
   day: DayOfWeek | '';
   start_time: string;
@@ -54,6 +45,7 @@ function formatTime(time: string): string {
 }
 
 export default function OfficeHoursPage() {
+  const t = useTranslations('Faculty');
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [editRows, setEditRows] = useState<EditRow[]>([]);
@@ -126,7 +118,7 @@ export default function OfficeHoursPage() {
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="text-muted-foreground">Loading office hours...</div>
+        <div className="text-muted-foreground">{t('officeHoursPage.loadingOfficeHours')}</div>
       </div>
     );
   }
@@ -139,7 +131,7 @@ export default function OfficeHoursPage() {
         {/* Office Hours Card */}
         <Card className="bg-white p-8">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold">My Office Hours</h3>
+            <h3 className="text-xl font-bold">{t('officeHoursPage.title')}</h3>
             {!isEditing && (
               <Button
                 variant="default"
@@ -148,7 +140,7 @@ export default function OfficeHoursPage() {
                 onClick={handleEditClick}
               >
                 <Pencil className="h-4 w-4" />
-                Edit Hours
+                {t('officeHoursPage.editHours')}
               </Button>
             )}
           </div>
@@ -165,15 +157,17 @@ export default function OfficeHoursPage() {
 
                   {/* Day */}
                   <div className="flex-1">
-                    <label className="mb-1.5 block text-xs font-semibold text-gray-600">Day</label>
+                    <label className="mb-1.5 block text-xs font-semibold text-gray-600">
+                      {t('officeHoursPage.day')}
+                    </label>
                     <Select value={row.day} onValueChange={(val) => updateRow(index, 'day', val)}>
                       <SelectTrigger className="h-10 w-full rounded-lg border border-gray-200 bg-white text-sm">
-                        <SelectValue placeholder="Select day" />
+                        <SelectValue placeholder={t('officeHoursPage.selectDay')} />
                       </SelectTrigger>
                       <SelectContent>
                         {allDays.map((d) => (
                           <SelectItem key={d} value={d}>
-                            {dayLabels[d]}
+                            {t(`days.${d}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -183,7 +177,7 @@ export default function OfficeHoursPage() {
                   {/* Start Time */}
                   <div className="flex-1">
                     <label className="mb-1.5 block text-xs font-semibold text-gray-600">
-                      Start Time
+                      {t('officeHoursPage.startTime')}
                     </label>
                     <input
                       type="time"
@@ -196,7 +190,7 @@ export default function OfficeHoursPage() {
                   {/* End Time */}
                   <div className="flex-1">
                     <label className="mb-1.5 block text-xs font-semibold text-gray-600">
-                      End Time
+                      {t('officeHoursPage.endTime')}
                     </label>
                     <input
                       type="time"
@@ -224,7 +218,7 @@ export default function OfficeHoursPage() {
                 className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 py-4 text-sm font-medium text-gray-500 transition-colors hover:border-gray-400 hover:text-gray-700"
               >
                 <Plus className="h-4 w-4" />
-                Add Office Hour
+                {t('officeHoursPage.addOfficeHour')}
               </button>
 
               {/* Actions */}
@@ -237,7 +231,7 @@ export default function OfficeHoursPage() {
                   disabled={isSaving}
                 >
                   <X className="h-4 w-4" />
-                  Cancel
+                  {t('officeHoursPage.cancel')}
                 </Button>
                 <Button
                   size="sm"
@@ -247,7 +241,7 @@ export default function OfficeHoursPage() {
                   title={!hasValidRows ? 'Add at least one complete office hour' : undefined}
                 >
                   <Save className="h-4 w-4" />
-                  {isSaving ? 'Saving...' : 'Save Changes'}
+                  {isSaving ? t('officeHoursPage.saving') : t('officeHoursPage.saveChanges')}
                 </Button>
               </div>
             </div>
@@ -256,7 +250,7 @@ export default function OfficeHoursPage() {
             <div className="mt-6 space-y-3">
               {officeHours.length === 0 ? (
                 <div className="flex h-32 items-center justify-center rounded-sm bg-sky-50 text-sm text-gray-500">
-                  No office hours set yet
+                  {t('officeHoursPage.noOfficeHours')}
                 </div>
               ) : (
                 officeHours.map((oh) => {
@@ -270,7 +264,7 @@ export default function OfficeHoursPage() {
                           <Clock className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-semibold">{dayLabels[oh.day]}</p>
+                          <p className="font-semibold">{t(`days.${oh.day}`)}</p>
                           <p className="text-sm text-gray-500">
                             {formatTime(oh.start_time)} – {formatTime(oh.end_time)}
                           </p>
@@ -287,20 +281,20 @@ export default function OfficeHoursPage() {
         {/* Tips Card */}
         <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-6">
           <h4 className="flex items-center gap-2 font-bold">
-            <span>📌</span> Office Hours Tips
+            <span>📌</span> {t('officeHoursPage.tipsTitle')}
           </h4>
           <ul className="mt-3 space-y-2 text-sm text-gray-700">
             <li className="flex items-start gap-2">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
-              Students can see your availability status in real-time through the navigation app
+              {t('officeHoursPage.tip1')}
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
-              Update your status when you&apos;re temporarily unavailable or in a meeting
+              {t('officeHoursPage.tip2')}
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
-              Regular office hours help students plan their visits effectively
+              {t('officeHoursPage.tip3')}
             </li>
           </ul>
         </div>

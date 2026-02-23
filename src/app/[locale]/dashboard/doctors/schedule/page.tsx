@@ -5,20 +5,10 @@ import { useEffect, useState } from 'react';
 import { useSchedule, useUpsertSchedule } from '@/hooks/useFaculty';
 import type { DayOfWeek } from '@/types/faculty';
 import { Clock, Loader2, MapPin, Pencil, Plus, Save, Trash2, Users, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-
-/* ── Day labels ── */
-const dayLabels: Record<DayOfWeek, string> = {
-  SUNDAY: 'Sunday',
-  MONDAY: 'Monday',
-  TUESDAY: 'Tuesday',
-  WEDNESDAY: 'Wednesday',
-  THURSDAY: 'Thursday',
-  FRIDAY: 'Friday',
-  SATURDAY: 'Saturday',
-};
 
 /* ── Work-week days to display ── */
 const weekDays: DayOfWeek[] = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY'];
@@ -39,6 +29,7 @@ const inputClass =
   'h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/30';
 
 export default function SchedulePage() {
+  const t = useTranslations('Faculty');
   const { data: schedule = [], isPending, isError } = useSchedule();
   const upsertSchedule = useUpsertSchedule();
 
@@ -144,7 +135,7 @@ export default function SchedulePage() {
         <Card className="bg-white p-8">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold">Weekly Teaching Schedule</h3>
+            <h3 className="text-xl font-bold">{t('schedulePage.editSchedule')}</h3>
             {!isEditing && (
               <Button
                 variant="default"
@@ -158,7 +149,7 @@ export default function SchedulePage() {
                 ) : (
                   <Pencil className="h-4 w-4" />
                 )}
-                Edit Schedule
+                {t('schedulePage.editSchedule')}
               </Button>
             )}
           </div>
@@ -167,7 +158,7 @@ export default function SchedulePage() {
             /* ── Edit Mode ── */
             <div className="mt-8 space-y-8">
               {editSlotsByDay.map(({ day, slots }) => {
-                const label = dayLabels[day];
+                const label = t(`days.${day}`);
                 return (
                   <div key={day}>
                     {/* Day header */}
@@ -186,7 +177,7 @@ export default function SchedulePage() {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <label className="text-primary mb-1.5 block text-xs font-semibold">
-                                Course Code
+                                {t('schedulePage.courseCode')}
                               </label>
                               <input
                                 type="text"
@@ -195,12 +186,12 @@ export default function SchedulePage() {
                                   updateSlot(slot.globalIndex, 'course_code', e.target.value)
                                 }
                                 className={inputClass}
-                                placeholder="e.g. CS201"
+                                placeholder={t('schedulePage.courseCodePlaceholder')}
                               />
                             </div>
                             <div>
                               <label className="text-primary mb-1.5 block text-xs font-semibold">
-                                Course Name (English)
+                                {t('schedulePage.courseNameEnglish')}
                               </label>
                               <input
                                 type="text"
@@ -209,7 +200,7 @@ export default function SchedulePage() {
                                   updateSlot(slot.globalIndex, 'course_name', e.target.value)
                                 }
                                 className={inputClass}
-                                placeholder="e.g. Data Structures"
+                                placeholder={t('schedulePage.courseNameEnPlaceholder')}
                               />
                             </div>
                           </div>
@@ -217,7 +208,7 @@ export default function SchedulePage() {
                           {/* Row 2: Course Name (Arabic) */}
                           <div className="mt-3">
                             <label className="text-primary mb-1.5 block text-xs font-semibold">
-                              Course Name (Arabic)
+                              {t('schedulePage.courseNameArabic')}
                             </label>
                             <input
                               type="text"
@@ -235,7 +226,7 @@ export default function SchedulePage() {
                           <div className="mt-3 grid grid-cols-2 gap-4">
                             <div>
                               <label className="text-primary mb-1.5 block text-xs font-semibold">
-                                Day
+                                {t('schedulePage.day')}
                               </label>
                               <select
                                 value={slot.day}
@@ -246,14 +237,14 @@ export default function SchedulePage() {
                               >
                                 {weekDays.map((d) => (
                                   <option key={d} value={d}>
-                                    {dayLabels[d]}
+                                    {t(`days.${d}`)}
                                   </option>
                                 ))}
                               </select>
                             </div>
                             <div>
                               <label className="text-primary mb-1.5 block text-xs font-semibold">
-                                Start Time
+                                {t('schedulePage.startTime')}
                               </label>
                               <input
                                 type="time"
@@ -270,7 +261,7 @@ export default function SchedulePage() {
                           <div className="mt-3 grid grid-cols-2 gap-4">
                             <div>
                               <label className="text-primary mb-1.5 block text-xs font-semibold">
-                                End Time
+                                {t('schedulePage.endTime')}
                               </label>
                               <input
                                 type="time"
@@ -283,7 +274,7 @@ export default function SchedulePage() {
                             </div>
                             <div>
                               <label className="text-primary mb-1.5 block text-xs font-semibold">
-                                Room
+                                {t('schedulePage.room')}
                               </label>
                               <input
                                 type="text"
@@ -292,7 +283,7 @@ export default function SchedulePage() {
                                   updateSlot(slot.globalIndex, 'room', e.target.value)
                                 }
                                 className={inputClass}
-                                placeholder="e.g. A-201"
+                                placeholder={t('schedulePage.roomPlaceholder')}
                               />
                             </div>
                           </div>
@@ -300,7 +291,7 @@ export default function SchedulePage() {
                           {/* Row 5: Number of Students */}
                           <div className="mt-3 w-1/2 pr-2">
                             <label className="text-primary mb-1.5 block text-xs font-semibold">
-                              Number of Students
+                              {t('schedulePage.numberOfStudents')}
                             </label>
                             <input
                               type="number"
@@ -322,7 +313,7 @@ export default function SchedulePage() {
                               className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-100"
                             >
                               <Trash2 className="h-4 w-4" />
-                              Remove Class
+                              {t('schedulePage.removeClass')}
                             </button>
                           </div>
                         </div>
@@ -335,7 +326,7 @@ export default function SchedulePage() {
                         className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 py-3 text-sm font-medium text-gray-500 transition-colors hover:border-gray-400 hover:text-gray-700"
                       >
                         <Plus className="h-4 w-4" />
-                        Add Class to {label}
+                        {t('schedulePage.addClass')} {label}
                       </button>
                     </div>
                   </div>
@@ -346,7 +337,7 @@ export default function SchedulePage() {
               <div className="flex items-center justify-end gap-3 pt-2">
                 <Button variant="outline" size="sm" className="gap-1.5" onClick={handleCancel}>
                   <X className="h-4 w-4" />
-                  Cancel
+                  {t('schedulePage.cancel')}
                 </Button>
                 <Button
                   size="sm"
@@ -359,7 +350,7 @@ export default function SchedulePage() {
                   ) : (
                     <Save className="h-4 w-4" />
                   )}
-                  {upsertSchedule.isPending ? 'Saving…' : 'Save Changes'}
+                  {upsertSchedule.isPending ? t('schedulePage.saving') : t('schedulePage.saveChanges')}
                 </Button>
               </div>
             </div>
@@ -367,7 +358,7 @@ export default function SchedulePage() {
             /* ── Read-Only Mode ── */
             <div className="mt-8 space-y-6">
               {slotsByDay.map(({ day, slots }) => {
-                const label = dayLabels[day];
+                const label = t(`days.${day}`);
                 return (
                   <div key={day}>
                     {/* Day header */}
@@ -379,7 +370,7 @@ export default function SchedulePage() {
                     <div className="mt-3 space-y-3">
                       {slots.length === 0 ? (
                         <div className="flex h-12 items-center justify-center rounded-lg bg-sky-50 text-sm text-gray-400">
-                          No classes scheduled for this day
+                          {t('schedulePage.noSchedule')}
                         </div>
                       ) : (
                         slots.map((slot) => (
@@ -409,7 +400,7 @@ export default function SchedulePage() {
                               </span>
                               <span className="flex items-center gap-1">
                                 <Users className="h-3.5 w-3.5" />
-                                {slot.student_count} students
+                                {slot.student_count} {t('schedulePage.students')}
                               </span>
                             </div>
                           </div>
