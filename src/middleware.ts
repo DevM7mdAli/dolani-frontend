@@ -33,7 +33,14 @@ export function middleware(request: NextRequest) {
   // If accessing signin while authenticated, redirect to dashboard
   if (route === '/signin' && hasSession) {
     const userRole = request.cookies.get('userRole')?.value || 'FACULTY';
-    const dashboardPath = userRole === 'ADMIN' ? '/dashboard/admin' : '/dashboard/doctors';
+    const dashboardPath =
+      userRole === 'ADMIN'
+        ? '/dashboard/admin'
+        : userRole === 'IT'
+          ? '/dashboard/it'
+          : userRole === 'SECURITY'
+            ? '/dashboard/security'
+            : '/dashboard/doctors';
     return NextResponse.redirect(new URL(`/${locale}${dashboardPath}`, request.url));
   }
 

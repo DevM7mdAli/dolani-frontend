@@ -1,0 +1,304 @@
+'use client';
+
+import { useState } from 'react';
+
+import type { DayOfWeek } from '@/types/faculty';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Clock, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+import { facultyApi } from '@/lib/api/faculty';
+
+const allDays: DayOfWeek[] = [
+  'SUNDAY',
+  'MONDAY',
+  'TUESDAY',
+  'WEDNESDAY',
+  'THURSDAY',
+  'FRIDAY',
+  'SATURDAY',
+];
+
+interface EditRow {
+  day: DayOfWeek | '';
+  start_time: string;
+  end_time: string;
+}
+
+/** Convert HH:MM (24h) → h:MM AM/PM for display */
+function formatTime(time: string): string {
+  const [h, m] = time.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+export default function OfficeHoursPage() {
+  const t = useTranslations('Faculty');
+  const queryClient = useQueryClient();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editRows, setEditRows] = useState<EditRow[]>([]);
+
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ['faculty', 'profile'],
+    queryFn: facultyApi.getMyProfile,
+  });
+
+  const { mutate: saveOfficeHours, isPending: isSaving } = useMutation({
+    mutationFn: (rows: EditRow[]) => {
+      const valid = rows.filter((r) => r.day && r.start_time && r.end_time);
+      // If there are rows but none are complete, warn user
+      if (rows.length > 0 && valid.length === 0) {
+        toast.error('Please complete the office hour fields or remove incomplete rows');
+        return Promise.reject(new Error('Incomplete rows'));
+      }
+      // valid can be empty (clearing all hours) — backend allows it now
+      return facultyApi.updateOfficeHours(
+        valid.map((r) => ({
+          day: r.day as string,
+          start_time: r.start_time,
+          end_time: r.end_time,
+        })),
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['faculty', 'profile'] });
+      setIsEditing(false);
+      toast.success('Office hours updated successfully');
+    },
+    onError: (err) => {
+      if ((err as Error).message !== 'Incomplete rows') {
+        toast.error('Failed to update office hours');
+      }
+    },
+  });
+
+  const handleEditClick = () => {
+    const existing = profile?.office_hours ?? [];
+    setEditRows(
+      existing.length > 0
+        ? existing.map((oh) => ({ day: oh.day, start_time: oh.start_time, end_time: oh.end_time }))
+        : [{ day: '', start_time: '', end_time: '' }],
+    );
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditRows([]);
+  };
+
+  const updateRow = (index: number, field: keyof EditRow, value: string) => {
+    setEditRows((prev) => prev.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
+  };
+
+  const deleteRow = (index: number) => {
+    setEditRows((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const addRow = () => {
+    setEditRows((prev) => [...prev, { day: '', start_time: '', end_time: '' }]);
+  };
+
+  // Disable save only when rows exist but ALL are incomplete
+  const hasValidRows =
+    editRows.length === 0 || editRows.some((r) => r.day && r.start_time && r.end_time);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="text-muted-foreground">{t('officeHoursPage.loadingOfficeHours')}</div>
+      </div>
+    );
+  }
+
+  const officeHours = profile?.office_hours ?? [];
+
+  return (
+    <div className="flex justify-center pt-10">
+      <div className="w-full max-w-4xl space-y-6">
+        {/* Office Hours Card */}
+        <Card className="bg-white p-8">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold">{t('officeHoursPage.title')}</h3>
+            {!isEditing && (
+              <Button
+                variant="default"
+                size="sm"
+                className="gap-2 rounded-sm"
+                onClick={handleEditClick}
+              >
+                <Pencil className="h-4 w-4" />
+                {t('officeHoursPage.editHours')}
+              </Button>
+            )}
+          </div>
+
+          {isEditing ? (
+            /* ── Edit Mode ── */
+            <div className="mt-6 space-y-4">
+              {editRows.map((row, index) => (
+                <div key={index} className="flex items-end gap-3 rounded-xl bg-sky-50 p-5">
+                  {/* Clock icon */}
+                  <div className="bg-primary text-primary-foreground mb-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                    <Clock className="h-5 w-5" />
+                  </div>
+
+                  {/* Day */}
+                  <div className="flex-1">
+                    <label className="mb-1.5 block text-xs font-semibold text-gray-600">
+                      {t('officeHoursPage.day')}
+                    </label>
+                    <Select value={row.day} onValueChange={(val) => updateRow(index, 'day', val)}>
+                      <SelectTrigger className="h-10 w-full rounded-lg border border-gray-200 bg-white text-sm">
+                        <SelectValue placeholder={t('officeHoursPage.selectDay')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allDays.map((d) => (
+                          <SelectItem key={d} value={d}>
+                            {t(`days.${d}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Start Time */}
+                  <div className="flex-1">
+                    <label className="mb-1.5 block text-xs font-semibold text-gray-600">
+                      {t('officeHoursPage.startTime')}
+                    </label>
+                    <input
+                      type="time"
+                      value={row.start_time}
+                      onChange={(e) => updateRow(index, 'start_time', e.target.value)}
+                      className="focus:border-primary focus:ring-primary/30 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none focus:ring-1"
+                    />
+                  </div>
+
+                  {/* End Time */}
+                  <div className="flex-1">
+                    <label className="mb-1.5 block text-xs font-semibold text-gray-600">
+                      {t('officeHoursPage.endTime')}
+                    </label>
+                    <input
+                      type="time"
+                      value={row.end_time}
+                      onChange={(e) => updateRow(index, 'end_time', e.target.value)}
+                      className="focus:border-primary focus:ring-primary/30 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none focus:ring-1"
+                    />
+                  </div>
+
+                  {/* Delete */}
+                  <button
+                    type="button"
+                    onClick={() => deleteRow(index)}
+                    className="mb-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-500 transition-colors hover:bg-red-100"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+
+              {/* Add Row */}
+              <button
+                type="button"
+                onClick={addRow}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 py-4 text-sm font-medium text-gray-500 transition-colors hover:border-gray-400 hover:text-gray-700"
+              >
+                <Plus className="h-4 w-4" />
+                {t('officeHoursPage.addOfficeHour')}
+              </button>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handleCancel}
+                  disabled={isSaving}
+                >
+                  <X className="h-4 w-4" />
+                  {t('officeHoursPage.cancel')}
+                </Button>
+                <Button
+                  size="sm"
+                  className="gap-1.5 bg-amber-400 text-white hover:bg-amber-500"
+                  onClick={() => saveOfficeHours(editRows)}
+                  disabled={isSaving || !hasValidRows}
+                  title={!hasValidRows ? 'Add at least one complete office hour' : undefined}
+                >
+                  <Save className="h-4 w-4" />
+                  {isSaving ? t('officeHoursPage.saving') : t('officeHoursPage.saveChanges')}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            /* ── Read-Only Mode ── */
+            <div className="mt-6 space-y-3">
+              {officeHours.length === 0 ? (
+                <div className="flex h-32 items-center justify-center rounded-sm bg-sky-50 text-sm text-gray-500">
+                  {t('officeHoursPage.noOfficeHours')}
+                </div>
+              ) : (
+                officeHours.map((oh) => {
+                  return (
+                    <div
+                      key={oh.id}
+                      className="flex items-center justify-between rounded-lg bg-sky-50 px-5 py-4"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="bg-primary text-primary-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-md">
+                          <Clock className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-semibold">{t(`days.${oh.day}`)}</p>
+                          <p className="text-sm text-gray-500">
+                            {formatTime(oh.start_time)} – {formatTime(oh.end_time)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+        </Card>
+
+        {/* Tips Card */}
+        <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-6">
+          <h4 className="flex items-center gap-2 font-bold">
+            <span>📌</span> {t('officeHoursPage.tipsTitle')}
+          </h4>
+          <ul className="mt-3 space-y-2 text-sm text-gray-700">
+            <li className="flex items-start gap-2">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+              {t('officeHoursPage.tip1')}
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+              {t('officeHoursPage.tip2')}
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+              {t('officeHoursPage.tip3')}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
