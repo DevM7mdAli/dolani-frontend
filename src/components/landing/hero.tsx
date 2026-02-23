@@ -30,7 +30,7 @@ export function Hero({ data }: { data: LandingPage['hero'] }) {
           transition={{ duration: 0.8, ease: 'easeOut' }}
           className="text-center md:text-start"
         >
-          <h1 className="text-primary mb-6 text-5xl leading-tight font-extrabold md:text-6xl lg:text-7xl">
+          <h1 className="text-primary mb-6 text-4xl leading-tight font-extrabold sm:text-5xl md:text-6xl lg:text-7xl">
             {data.headline} <br />
             <span className="text-secondary">{data.headlineHighlight}</span>
           </h1>
@@ -87,10 +87,10 @@ export function Hero({ data }: { data: LandingPage['hero'] }) {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative flex h-[500px] w-full items-center justify-center"
+          className="relative flex h-auto w-full items-center justify-center md:h-125"
         >
           {/* Main Card */}
-          <div className="relative h-[400px] w-[500px] rounded-[2rem] bg-white p-4 shadow-2xl">
+          <div className="relative h-auto w-full max-w-125 rounded-4xl bg-white p-4 shadow-2xl md:h-100 md:w-125">
             {/* Inner Map Area */}
             {data.heroImage ? (
               <Image
@@ -99,17 +99,21 @@ export function Hero({ data }: { data: LandingPage['hero'] }) {
                     ? data.heroImage
                     : (data.heroImage as any).url || ''
                 }
-                className="h-full w-full rounded-[1.5rem] object-cover"
+                className="h-auto w-full rounded-[1.5rem] object-contain"
                 width={500}
                 height={400}
+                sizes="(max-width: 768px) 100vw, 500px"
                 alt="Hero navigation mockup"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-[1.5rem] bg-gradient-to-br from-slate-100 to-slate-200">
-                <span className="text-muted-foreground text-center text-sm font-medium">
-                  Hero image will appear here
-                </span>
-              </div>
+              <Image
+                src={'/hero.svg'}
+                className="h-auto w-full rounded-[1.5rem] object-contain"
+                width={500}
+                height={400}
+                sizes="(max-width: 768px) 100vw, 500px"
+                alt="Hero navigation mockup"
+              />
             )}
           </div>
         </motion.div>
