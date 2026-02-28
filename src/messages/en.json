@@ -9,68 +9,6 @@
     "downloadApp": "Download App",
     "facultyPortal": "Faculty Portal"
   },
-  "Landing": {
-    "nav": {
-      "features": "Features",
-      "technology": "Technology",
-      "team": "Team",
-      "contact": "Contact",
-      "login": "Faculty Login"
-    },
-    "hero": {
-      "headline": "Navigate CCSIT with Confidence.",
-      "subheadline": "Real-time indoor navigation, faculty availability, and emergency routing—all in one smart app."
-    },
-    "features": {
-      "title": "Why Dolani?",
-      "precisionTitle": "Precision Navigation",
-      "precisionDesc": "Turn-by-turn directions to any room with 1-meter accuracy using BLE Beacons.",
-      "facultyTitle": "Faculty Finder",
-      "facultyDesc": "Real-time status indicators. Know if your professor is Available, Busy, or Away.",
-      "searchTitle": "Smart Search",
-      "searchDesc": "Find labs, offices, and lecture halls instantly by name or code (e.g., 'A11-201').",
-      "emergencyTitle": "Emergency Mode",
-      "emergencyDesc": "Safety first. One-tap routing to the nearest safe exit, automatically avoiding elevators."
-    },
-    "how": {
-      "title": "How It Works",
-      "step1Title": "Detection",
-      "step1Desc": "Our app detects signals from BLE beacons installed every 8 meters.",
-      "step2Title": "Positioning",
-      "step2Desc": "We calculate your exact position using trilateration and advanced signal smoothing.",
-      "step3Title": "Routing",
-      "step3Desc": "The A* algorithm finds the shortest path to your destination instantly."
-    },
-    "tech": {
-      "tagline": "Built for reliability. Works even when campus Wi-Fi is unstable."
-    },
-    "team": {
-      "title": "Meet the Team",
-      "subtitle": "The minds behind Dolani - Group 06 CCSIT",
-      "member1": "Mohammed Ali",
-      "role1": "Frontend & Mobile",
-      "member2": "Ahmed Al-Saeed",
-      "role2": "Backend & Cloud",
-      "member3": "Khalid Al-Ghamdi",
-      "role3": "IoT & Hardware",
-      "member4": "Omar Al-Harbi",
-      "role4": "UI/UX Design"
-    },
-    "faq": {
-      "title": "Frequently Asked Questions",
-      "q1": "Do I need internet to use Dolani?",
-      "a1": "Yes, an internet connection is required to fetch real-time faculty status, but navigation data is cached for offline use.",
-      "q2": "What phones are supported?",
-      "a2": "Dolani works on any iOS or Android device with Bluetooth 4.0 (BLE) support.",
-      "q3": "Is my location data private?",
-      "a3": "Absolutely. Your location is calculated locally on your device and is never stored or sent to our servers.",
-      "q4": "How strict is the faculty availability?",
-      "a4": "Faculty members manage their status manually, but we also use office beacons to auto-update when they are in their office."
-    },
-    "footer": {
-      "copyright": "© 2026 Dolani Group 06. Imam Abdulrahman Bin Faisal University."
-    }
-  },
   "Admin": {
     "analytics": "Analytics",
     "mapEditor": "Map Editor",
@@ -82,10 +20,113 @@
   },
   "Faculty": {
     "status": "Status",
-    "schedule": "Schedule",
+    "schedule": "My Schedule",
     "available": "Available",
-    "busy": "Busy",
-    "away": "Away"
+    "notAvailable": "Not Available",
+    "myProfile": "My Profile",
+    "officeHours": "Office Hours",
+    "reports": "Reports",
+    "title": "Dolani Faculty",
+    "profile": {
+      "personalInformation": "Personal Information",
+      "fullName": "Full Name",
+      "titleLabel": "Title",
+      "department": "Department",
+      "email": "Email",
+      "officeRoom": "Office Room",
+      "statusLabel": "Status",
+      "loadingProfile": "Loading profile...",
+      "profileNotFound": "Profile not found"
+    },
+    "officeHoursPage": {
+      "title": "My Office Hours",
+      "editHours": "Edit Hours",
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "day": "Day",
+      "selectDay": "Select day",
+      "addOfficeHour": "Add Office Hour",
+      "noOfficeHours": "No office hours set.",
+      "loadingOfficeHours": "Loading office hours...",
+      "tipsTitle": "Office Hours Tips",
+      "tip1": "Office hours are times when students can visit you without an appointment.",
+      "tip2": "You can set multiple time slots for each day.",
+      "tip3": "Make sure to update your status when you're unavailable during office hours."
+    },
+    "schedulePage": {
+      "editSchedule": "Edit Schedule",
+      "addClass": "Add Class to",
+      "removeClass": "Remove Class",
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes",
+      "saving": "Saving…",
+      "students": "students",
+      "courseCode": "Course Code",
+      "courseNameEnglish": "Course Name (English)",
+      "courseNameArabic": "Course Name (Arabic)",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "room": "Room",
+      "numberOfStudents": "Number of Students",
+      "courseCodePlaceholder": "e.g., CS201",
+      "courseNameEnPlaceholder": "e.g., Data Structures",
+      "roomPlaceholder": "e.g., A-201",
+      "noSchedule": "No classes scheduled.",
+      "loadingSchedule": "Loading schedule..."
+    },
+    "reportsPage": {
+      "roomReports": "Room Reports",
+      "subtitle": "Report and track facility issues in your rooms",
+      "newReport": "New Report",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Brief description of the issue",
+      "category": "Category",
+      "roomLabel": "Room",
+      "roomPlaceholder": "e.g., A11-201",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the issue in detail...",
+      "newReportBtn": "New Report",
+      "cancelBtn": "Cancel",
+      "submitReport": "Submit Report",
+      "noReports": "No reports yet.",
+      "loadingReports": "Loading reports...",
+      "allReports": "All",
+      "categories": {
+        "PROJECTOR": "Projector Issue",
+        "SMART_BOARD": "Smart Board Issue",
+        "COMPUTER": "Computer Issue",
+        "PRINTER": "Printer Issue",
+        "AC": "AC Issue",
+        "LIGHT": "Light Issue",
+        "DOOR": "Door Issue",
+        "POWER_OUTLET": "Power Outlet Issue",
+        "CLEANLINESS": "Cleanliness Issue",
+        "SAFETY": "Safety Issue",
+        "OTHER": "Other"
+      },
+      "categoryGroups": {
+        "tech": "Tech",
+        "facility": "Facility",
+        "general": "General"
+      },
+      "statuses": {
+        "PENDING": "Pending",
+        "IN_PROGRESS": "In Progress",
+        "RESOLVED": "Resolved"
+      }
+    },
+    "days": {
+      "SUNDAY": "Sunday",
+      "MONDAY": "Monday",
+      "TUESDAY": "Tuesday",
+      "WEDNESDAY": "Wednesday",
+      "THURSDAY": "Thursday",
+      "FRIDAY": "Friday",
+      "SATURDAY": "Saturday"
+    }
   },
   "MapEditor": {
     "title": "Map Editor",
@@ -127,6 +168,87 @@
       "beaconUuid": "Beacon UUID",
       "linkedNode": "Linked Node",
       "none": "— None —"
+    }
+  },
+  "IT": {
+    "sidebar": {
+      "title": "Dolani IT",
+      "role": "IT Staff",
+      "overview": "Overview",
+      "reports": "Reports",
+      "signOut": "Sign Out",
+      "signingOut": "Signing out…",
+      "itDashboard": "IT Dashboard",
+      "reportNumber": "Report #{id}"
+    },
+    "overview": {
+      "heading": "IT Dashboard",
+      "subtitle": "Monitor and manage facility reports across all rooms",
+      "totalReports": "Total Reports",
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "resolved": "Resolved",
+      "pendingReports": "Pending Reports",
+      "viewAll": "View All",
+      "allCaughtUp": "All caught up!",
+      "noPendingDesc": "No pending reports at the moment.",
+      "startWorking": "Start Working",
+      "view": "View",
+      "inProgressCount": "{count} reports being worked on",
+      "resolvedCount": "{count} reports completed"
+    },
+    "reports": {
+      "searchPlaceholder": "Search by title, room, professor…",
+      "allCategories": "All Categories",
+      "allStatus": "All",
+      "submittedBy": "Submitted by",
+      "resolvedBy": "Resolved by",
+      "resolvedOn": "on",
+      "startWorking": "Start Working",
+      "markResolved": "Mark as Resolved",
+      "collapse": "Collapse",
+      "expand": "Expand",
+      "failedLoad": "Failed to load reports.",
+      "refreshPage": "Please refresh the page.",
+      "noReports": "No reports found",
+      "noReportsYet": "No reports have been submitted yet.",
+      "adjustFilters": "Try adjusting your filters or search term."
+    },
+    "detail": {
+      "reportNotFound": "Report not found",
+      "reportNotFoundDesc": "This report may have been deleted or the ID is invalid.",
+      "backToReports": "Back to Reports",
+      "submitted": "Submitted",
+      "description": "Description",
+      "submittedByMember": "Report submitted by this faculty member",
+      "department": "Department",
+      "email": "Email",
+      "phone": "Phone",
+      "officeRoom": "Office Room",
+      "reportResolved": "Report Resolved",
+      "resolvedBy": "Resolved by",
+      "resolvedOn": "Resolved on",
+      "startWorking": "Start Working",
+      "markResolved": "Mark as Resolved",
+      "resolvedBtn": "Resolved"
+    },
+    "categories": {
+      "PROJECTOR": "Projector",
+      "SMART_BOARD": "Smart Board",
+      "COMPUTER": "Computer",
+      "PRINTER": "Printer",
+      "AC": "AC",
+      "LIGHT": "Light",
+      "DOOR": "Door",
+      "PLUG": "Power Outlet",
+      "CLEANLINESS": "Cleanliness",
+      "SAFETY": "Safety",
+      "OTHER": "Other"
+    },
+    "statuses": {
+      "PENDING": "Pending",
+      "IN_PROGRESS": "In Progress",
+      "RESOLVED": "Resolved"
     }
   }
 }

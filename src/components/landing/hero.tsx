@@ -1,16 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
+import Image from 'next/image';
+
 import { Link as I18nLink } from '@/i18n/routing';
-import { ArrowLeft, ArrowRight, Download } from 'lucide-react';
+import type { LandingPage } from '@/payload-types';
+import { ArrowLeft, ArrowRight, ArrowRightIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 
-export function Hero() {
-  const t = useTranslations('Landing.hero');
-  const tCommon = useTranslations('Common');
+export function Hero({ data }: { data: LandingPage['hero'] }) {
   const locale = useLocale();
   const isRtl = locale === 'ar';
 
@@ -18,6 +19,9 @@ export function Hero() {
 
   return (
     <section className="relative overflow-hidden pt-32 pb-20 md:pt-48 md:pb-32">
+      {/* Background Gradient */}
+      <div className="from-accent/50 absolute top-0 right-0 left-0 -z-10 h-150 bg-linear-to-b to-transparent"></div>
+
       <div className="container mx-auto grid items-center gap-12 px-6 md:grid-cols-2">
         {/* Text Content */}
         <motion.div
@@ -26,29 +30,55 @@ export function Hero() {
           transition={{ duration: 0.8, ease: 'easeOut' }}
           className="text-center md:text-start"
         >
-          <h1 className="mb-6 text-4xl leading-tight font-extrabold text-[#003B46] md:text-6xl">
-            {t('headline')}
+          <h1 className="text-primary mb-6 text-4xl leading-tight font-extrabold sm:text-5xl md:text-6xl lg:text-7xl">
+            {data.headline} <br />
+            <span className="text-secondary">{data.headlineHighlight}</span>
           </h1>
           <p className="text-muted-foreground mx-auto mb-8 max-w-lg text-lg leading-relaxed md:mx-0 md:text-xl">
-            {t('subheadline')}
+            {data.subheadline}
           </p>
 
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row md:justify-start">
+          <div className="mb-10 flex flex-col items-center justify-center gap-4 sm:flex-row md:justify-start">
             <Button
               size="lg"
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-secondary/20 h-12 w-full px-8 text-lg font-bold shadow-lg transition-transform duration-200 hover:scale-105 sm:w-auto"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 w-full rounded-full px-8 text-base font-semibold sm:w-auto"
             >
-              {tCommon('downloadApp')} <Download className="ml-2 h-5 w-5" />
+              {data.downloadApp} <ArrowIcon className="ml-2 h-4 w-4" />
             </Button>
             <I18nLink href="/signin">
               <Button
                 variant="outline"
                 size="lg"
-                className="border-primary text-primary hover:bg-primary/5 h-12 w-full px-8 text-lg font-semibold sm:w-auto"
+                className="border-primary text-primary hover:bg-primary/5 h-12 w-full rounded-full px-8 text-base font-semibold sm:w-auto"
               >
-                {tCommon('facultyPortal')} <ArrowIcon className="ml-2 h-5 w-5" />
+                <div className="border-primary mr-2 flex h-6 w-6 items-center justify-center rounded-full border">
+                  <ArrowRightIcon className="h-3 w-3" />
+                </div>
+                {data.watchDemo}
               </Button>
             </I18nLink>
+          </div>
+
+          {/* Active Users Badge */}
+          <div className="flex items-center justify-center gap-4 md:justify-start">
+            <div className="flex -space-x-3">
+              <div className="bg-primary flex h-10 w-10 items-center justify-center rounded-full border-2 border-white text-xs font-bold text-white">
+                MA
+              </div>
+              <div className="bg-secondary text-primary flex h-10 w-10 items-center justify-center rounded-full border-2 border-white text-xs font-bold">
+                SA
+              </div>
+              <div className="bg-primary flex h-10 w-10 items-center justify-center rounded-full border-2 border-white text-xs font-bold text-white">
+                KA
+              </div>
+              <div className="bg-muted text-muted-foreground flex h-10 w-10 items-center justify-center rounded-full border-2 border-white text-xs font-bold">
+                +12
+              </div>
+            </div>
+            <div className="text-left">
+              <div className="text-primary text-sm font-bold">{data.activeUsers}</div>
+              <div className="text-muted-foreground text-xs">{data.activeUsersText}</div>
+            </div>
           </div>
         </motion.div>
 
@@ -57,52 +87,35 @@ export function Hero() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="group relative flex h-[400px] w-full items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 p-8 shadow-2xl"
+          className="relative flex h-auto w-full items-center justify-center md:h-125"
         >
-          {/* Isometric Floor Plan Mockup */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(226,232,240,0.4)_1px,transparent_1px),linear-gradient(to_right,rgba(226,232,240,0.4)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] bg-[size:40px_40px]"></div>
-
-          {/* Pulsing Blue Dot Animation */}
-          <svg
-            viewBox="0 0 100 100"
-            className="pointer-events-none absolute inset-0 z-10 h-full w-full opacity-60"
-          >
-            <motion.path
-              d="M 20 80 Q 50 20 80 80"
-              fill="transparent"
-              stroke="#FFD700"
-              strokeWidth="4"
-              strokeDasharray="0 1"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                repeatType: 'reverse',
-                ease: 'easeInOut',
-              }}
-            />
-          </svg>
-          <div className="bg-primary/10 absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full blur-3xl"></div>
-
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            className="border-secondary relative z-20 max-w-xs rounded-2xl border-l-4 bg-white p-6 shadow-xl"
-          >
-            <div className="mb-3 flex items-center gap-3">
-              <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-full font-bold">
-                A1
-              </div>
-              <div>
-                <div className="font-bold text-slate-800">Lab 201</div>
-                <div className="text-xs text-slate-500">24m away • ETA 1 min</div>
-              </div>
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
-              <div className="bg-primary h-full w-2/3"></div>
-            </div>
-          </motion.div>
+          {/* Main Card */}
+          <div className="relative h-auto w-full max-w-125 rounded-4xl bg-white p-4 shadow-2xl md:h-100 md:w-125">
+            {/* Inner Map Area */}
+            {data.heroImage ? (
+              <Image
+                src={
+                  typeof data.heroImage === 'string'
+                    ? data.heroImage
+                    : (data.heroImage as any).url || ''
+                }
+                className="h-auto w-full rounded-[1.5rem] object-contain"
+                width={500}
+                height={400}
+                sizes="(max-width: 768px) 100vw, 500px"
+                alt="Hero navigation mockup"
+              />
+            ) : (
+              <Image
+                src={'/hero.svg'}
+                className="h-auto w-full rounded-[1.5rem] object-contain"
+                width={500}
+                height={400}
+                sizes="(max-width: 768px) 100vw, 500px"
+                alt="Hero navigation mockup"
+              />
+            )}
+          </div>
         </motion.div>
       </div>
     </section>
