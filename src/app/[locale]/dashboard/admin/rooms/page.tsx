@@ -53,8 +53,8 @@ export default function RoomManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDeptFilter, setSelectedDeptFilter] = useState<number | 'all'>('all');
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string | 'all'>('all');
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  const [editingRoomId, setEditingRoomId] = useState<number | string | null>(null);
+  const [editingValues, setEditingValues] = useState<Partial<Room>>({});
 
   const pageSize = 6;
 
@@ -115,28 +115,17 @@ export default function RoomManagement() {
   const startIdx = (currentPage - 1) * pageSize;
   const displayedRooms = filteredRooms.slice(startIdx, startIdx + pageSize);
 
-  // Generate page numbers for pagination buttons
+  // Generate page numbers for pagination buttons - simple fixed 3-button display
   const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const maxPagesToShow = 3;
+    const pages: number[] = [];
 
-    if (totalPages <= maxPagesToShow) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage > 1) pages.push(1);
-      if (currentPage > 2) pages.push('...');
-
-      const start = Math.max(1, currentPage - 1);
-      const end = Math.min(totalPages, currentPage + 1);
-
-      for (let i = start; i <= end; i++) {
-        if (!pages.includes(i)) pages.push(i);
-      }
-
-      if (currentPage < totalPages - 1) pages.push('...');
-      if (currentPage < totalPages) pages.push(totalPages);
+    // Always show: previous page (if exists), current page, next page (if exists)
+    if (currentPage - 1 >= 1) {
+      pages.push(currentPage - 1);
+    }
+    pages.push(currentPage);
+    if (currentPage + 1 <= totalPages) {
+      pages.push(currentPage + 1);
     }
 
     return pages;
@@ -170,23 +159,35 @@ export default function RoomManagement() {
     setCurrentPage(1); // Reset to first page
   };
 
-  // Handle edit room
+  // Handle edit room - start inline editing for a specific room
   const handleEditRoom = (room: Room) => {
-    setEditingRoom({ ...room });
-    setIsEditOpen(true);
+    setEditingRoomId(room.id);
+    setEditingValues({
+      name: room.name,
+      type: room.type,
+      floor: room.floor,
+    });
   };
 
-  // Handle close edit modal
-  const handleCloseEdit = () => {
-    setIsEditOpen(false);
-    setEditingRoom(null);
+  // Handle cancel edit - discard changes
+  const handleCancelEdit = () => {
+    setEditingRoomId(null);
+    setEditingValues({});
+  };
+
+  // Handle field change in inline edit
+  const handleEditFieldChange = (field: keyof Partial<Room>, value: string | number) => {
+    setEditingValues((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   // Handle save edit (TODO: Connect to backend update endpoint)
   const handleSaveEdit = (): void => {
     // TODO: Call backend API to update room
-    console.log('Saving room:', editingRoom);
-    handleCloseEdit();
+    console.log('Saving room:', editingRoomId, editingValues);
+    handleCancelEdit();
   };
 
   return (
@@ -335,22 +336,66 @@ export default function RoomManagement() {
                 {displayedRooms.map((room) => (
                   <tr key={room.id} className="transition-colors hover:bg-gray-50">
                     <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-teal-100 bg-teal-50 text-sm font-bold text-teal-700">
-                          {room.code.substring(0, 2)}
+                      {editingRoomId === room.id ? (
+                        <Input
+                          type="text"
+                          value={editingValues.name || ''}
+                          onChange={(e) => handleEditFieldChange('name', e.target.value)}
+                          className="mt-1"
+                          dir="rtl"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-teal-100 bg-teal-50 text-sm font-bold text-teal-700">
+                            {room.code.substring(0, 2)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-800">{room.name}</p>
+                            <p className="text-[10px] text-gray-400">{room.code}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-gray-800">{room.name}</p>
-                          <p className="text-[10px] text-gray-400">{room.code}</p>
-                        </div>
-                      </div>
+                      )}
                     </td>
                     <td className="p-4 font-medium text-gray-600">{room.dept}</td>
                     <td className="p-4 text-gray-500">
-                      <span>{room.floor}</span>
+                      {editingRoomId === room.id ? (
+                        <Input
+                          type="number"
+                          value={editingValues.floor || ''}
+                          onChange={(e) => handleEditFieldChange('floor', parseInt(e.target.value))}
+                          className="mt-1"
+                          dir="rtl"
+                        />
+                      ) : (
+                        <span>{room.floor}</span>
+                      )}
                     </td>
                     <td className="p-4 text-gray-500">
-                      <span className="text-xs">{room.type}</span>
+                      {editingRoomId === room.id ? (
+                        <select
+                          className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                          value={
+                            Object.keys(LOCATION_TYPE_DISPLAY).find(
+                              (key) => LOCATION_TYPE_DISPLAY[key] === editingValues.type,
+                            ) || ''
+                          }
+                          onChange={(e) =>
+                            handleEditFieldChange(
+                              'type',
+                              LOCATION_TYPE_DISPLAY[e.target.value] || e.target.value,
+                            )
+                          }
+                          dir="rtl"
+                        >
+                          {LOCATION_TYPES.map((type) => (
+                            <option key={type} value={type}>
+                              {LOCATION_TYPE_DISPLAY[type] || type}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="text-xs">{room.type}</span>
+                      )}
                     </td>
                     <td className="p-4 text-gray-500">
                       <span className="text-[11px]">{room.building}</span>
@@ -364,14 +409,36 @@ export default function RoomManagement() {
                     </td>
                     <td className="p-4">
                       <div className="flex gap-2">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8 border-blue-100 text-blue-600 hover:bg-blue-50"
-                          onClick={() => handleEditRoom(room)}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
+                        {editingRoomId === room.id ? (
+                          <>
+                            <Button
+                              size="icon"
+                              className="h-8 w-8 bg-green-600 text-white hover:bg-green-700"
+                              onClick={handleSaveEdit}
+                              title="Save"
+                            >
+                              <span className="text-xs">✓</span>
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              className="h-8 w-8 border-red-200 text-red-600 hover:bg-red-50"
+                              onClick={handleCancelEdit}
+                              title="Cancel"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-8 w-8 border-blue-100 text-blue-600 hover:bg-blue-50"
+                            onClick={() => handleEditRoom(room)}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -392,163 +459,37 @@ export default function RoomManagement() {
               variant="outline"
               size="sm"
               className="h-8 gap-1 px-3 text-xs"
-              onClick={handleNextPage}
-              disabled={currentPage >= totalPages}
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1}
             >
-              <span>التالي</span>
               <ChevronRight className="h-3 w-3" />
+
+              <span>السابق</span>
             </Button>
-            {getPageNumbers().map((num, idx) =>
-              typeof num === 'number' ? (
-                <Button
-                  key={idx}
-                  variant={num === currentPage ? 'default' : 'outline'}
-                  size="icon"
-                  className={`h-8 w-8 text-xs ${num === currentPage ? 'bg-teal-800' : ''}`}
-                  onClick={() => handlePageClick(num)}
-                >
-                  {num}
-                </Button>
-              ) : (
-                <span key={idx} className="px-2 text-gray-400">
-                  {num}
-                </span>
-              ),
-            )}
+            {getPageNumbers().map((num) => (
+              <Button
+                key={num}
+                variant={num === currentPage ? 'default' : 'outline'}
+                size="icon"
+                className={`h-8 w-8 text-xs ${num === currentPage ? 'bg-teal-800' : ''}`}
+                onClick={() => handlePageClick(num)}
+              >
+                {num}
+              </Button>
+            ))}
             <Button
               variant="outline"
               size="sm"
               className="h-8 gap-1 px-3 text-xs"
-              onClick={handlePrevPage}
-              disabled={currentPage <= 1}
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages}
             >
+              <span>التالي</span>
               <ChevronLeft className="h-3 w-3" />
-              <span>السابق</span>
             </Button>
           </div>
         </div>
       </Card>
-
-      {/* Edit Room Modal */}
-      {isEditOpen && editingRoom && (
-        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
-          <Card className="w-full max-w-md p-6 shadow-lg">
-            <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-teal-800">تعديل الغرفة</h3>
-              <button onClick={handleCloseEdit} className="text-gray-400 hover:text-gray-600">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">رمز الغرفة</label>
-                <Input
-                  type="text"
-                  value={editingRoom.code}
-                  readOnly
-                  className="mt-1 bg-gray-100"
-                  dir="rtl"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">اسم الغرفة</label>
-                <Input
-                  type="text"
-                  value={editingRoom.name}
-                  onChange={(e) => setEditingRoom({ ...editingRoom, name: e.target.value })}
-                  className="mt-1"
-                  dir="rtl"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">النوع</label>
-                <select
-                  className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                  value={
-                    Object.keys(LOCATION_TYPE_DISPLAY).find(
-                      (key) => LOCATION_TYPE_DISPLAY[key] === editingRoom.type,
-                    ) || ''
-                  }
-                  onChange={(e) =>
-                    setEditingRoom({
-                      ...editingRoom,
-                      type: LOCATION_TYPE_DISPLAY[e.target.value] || e.target.value,
-                    })
-                  }
-                  dir="rtl"
-                >
-                  {LOCATION_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {LOCATION_TYPE_DISPLAY[type] || type}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">القسم</label>
-                <Input
-                  type="text"
-                  value={editingRoom.dept}
-                  readOnly
-                  className="mt-1 bg-gray-100"
-                  dir="rtl"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">الطابق</label>
-                <Input
-                  type="number"
-                  value={editingRoom.floor}
-                  onChange={(e) =>
-                    setEditingRoom({ ...editingRoom, floor: parseInt(e.target.value) })
-                  }
-                  className="mt-1"
-                  dir="rtl"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">المبنى</label>
-                <Input
-                  type="text"
-                  value={editingRoom.building}
-                  readOnly
-                  className="mt-1 bg-gray-100"
-                  dir="rtl"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">الحالة</label>
-                <Input
-                  type="text"
-                  value={editingRoom.status}
-                  readOnly
-                  className="mt-1 bg-gray-100"
-                  dir="rtl"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <Button
-                className="flex-1 bg-teal-700 text-white hover:bg-teal-800"
-                onClick={handleSaveEdit}
-              >
-                حفظ
-              </Button>
-              <Button variant="outline" className="flex-1" onClick={handleCloseEdit}>
-                إلغاء
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }
