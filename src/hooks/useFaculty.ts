@@ -19,7 +19,8 @@ export const facultyKeys = {
   all: ['faculty'] as const,
   profile: () => [...facultyKeys.all, 'profile'] as const,
   schedule: () => [...facultyKeys.all, 'schedule'] as const,
-  reports: (params: ReportListParams = {}) => [...facultyKeys.all, 'reports', params] as const,
+  reports: (status?: string, category?: string, page = 1, limit = 20) =>
+    [...facultyKeys.all, 'reports', { status, category, page, limit }] as const,
 } as const;
 
 // ─── Profile ─────────────────────────────────────────────────────────────────
@@ -60,9 +61,11 @@ export function useUpsertSchedule() {
 // ─── Reports ─────────────────────────────────────────────────────────────────
 
 export function useMyReports(params: ReportListParams = {}) {
+  const { status, category, page = 1, limit = 20 } = params;
+
   return useQuery<Paginated<Report>, AxiosError>({
-    queryKey: facultyKeys.reports(params),
-    queryFn: () => facultyApi.getMyReports(params),
+    queryKey: facultyKeys.reports(status, category, page, limit),
+    queryFn: () => facultyApi.getMyReports({ ...params, page, limit }),
     staleTime: 60 * 1000,
   });
 }
