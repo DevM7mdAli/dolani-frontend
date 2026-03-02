@@ -94,7 +94,7 @@ export default function ProfilePage() {
           <div>
             <label className="mb-2 block text-sm font-semibold">{t('profile.statusLabel')}</label>
             <div className="rounded-sm bg-sky-50 px-4 py-3 text-sm text-gray-700">
-              {profile.status}
+              {profile.status === 'AVAILABLE' ? t('available') : t('notAvailable')}
             </div>
           </div>
         </div>

@@ -70,6 +70,7 @@
       "startTime": "وقت البدء",
       "endTime": "وقت الانتهاء",
       "room": "القاعة",
+      "day": "اليوم",
       "numberOfStudents": "عدد الطلاب",
       "courseCodePlaceholder": "مثال: CS201",
       "courseNameEnPlaceholder": "مثال: هياكل البيانات",
@@ -102,7 +103,7 @@
         "AC": "مشكلة التكييف",
         "LIGHT": "مشكلة الإضاءة",
         "DOOR": "مشكلة الباب",
-        "POWER_OUTLET": "مشكلة المقبس الكهربائي",
+        "PLUG": "مشكلة المقبس الكهربائي",
         "CLEANLINESS": "مشكلة النظافة",
         "SAFETY": "مشكلة السلامة",
         "OTHER": "أخرى"

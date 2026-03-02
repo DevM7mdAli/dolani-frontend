@@ -70,6 +70,7 @@
       "startTime": "Start Time",
       "endTime": "End Time",
       "room": "Room",
+      "day": "Day",
       "numberOfStudents": "Number of Students",
       "courseCodePlaceholder": "e.g., CS201",
       "courseNameEnPlaceholder": "e.g., Data Structures",
@@ -102,7 +103,7 @@
         "AC": "AC Issue",
         "LIGHT": "Light Issue",
         "DOOR": "Door Issue",
-        "POWER_OUTLET": "Power Outlet Issue",
+        "PLUG": "Power Outlet Issue",
         "CLEANLINESS": "Cleanliness Issue",
         "SAFETY": "Safety Issue",
         "OTHER": "Other"
