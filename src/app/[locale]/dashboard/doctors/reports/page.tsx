@@ -291,9 +291,11 @@ export default function ReportsPage() {
     'ALL',
   );
 
-  const { data, isPending, isError } = useMyReports(
-    statusFilter !== 'ALL' ? { status: statusFilter } : {},
-  );
+  const { data, isPending, isError } = useMyReports({
+    ...(statusFilter !== 'ALL' && { status: statusFilter }),
+    page: 1,
+    limit: 20,
+  });
   const reports = data?.data ?? [];
 
   const statusTabs: { label: string; value: typeof statusFilter }[] = [
