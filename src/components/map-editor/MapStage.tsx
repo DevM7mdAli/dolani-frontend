@@ -142,7 +142,7 @@ export default function MapStage() {
         onDragEnd={handleDragEnd}
       >
         {/* Layer 1: Floor plan image */}
-        <BackgroundLayer src={floor?.floor_plan_image_url ?? null} />
+        <BackgroundLayer src={floor?.floor_plan_image_url ?? '/map.svg'} />
 
         {/* Layer 2 + 3 + 4: Edges, Nodes, Beacons */}
         <GraphLayer />
