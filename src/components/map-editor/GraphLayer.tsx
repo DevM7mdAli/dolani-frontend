@@ -16,17 +16,24 @@ const BEACON_RADIUS = 8;
 
 const TYPE_COLORS: Record<LocationType, string> = {
   [LocationType.CLASSROOM]: '#3B82F6', // blue
-  [LocationType.CORRIDOR]: '#9CA3AF', // gray
-  [LocationType.ELEVATOR]: '#8B5CF6', // violet
-  [LocationType.STAIRS]: '#F59E0B', // amber
-  [LocationType.RESTROOM]: '#06B6D4', // cyan
-  [LocationType.EXIT]: '#EF4444', // red
   [LocationType.OFFICE]: '#10B981', // emerald
+  [LocationType.CORRIDOR]: '#9CA3AF', // gray
   [LocationType.LAB]: '#EC4899', // pink
-  [LocationType.AUDITORIUM]: '#F97316', // orange
-  [LocationType.LIBRARY]: '#6366F1', // indigo
+  [LocationType.THEATER]: '#F97316', // orange
+  [LocationType.CONFERENCE]: '#A855F7', // purple
+  [LocationType.EXIT]: '#EF4444', // red
+  [LocationType.ELEVATOR]: '#8B5CF6', // violet
+  [LocationType.MAIN_HALL]: '#14B8A6', // teal
+  [LocationType.RESTROOM]: '#06B6D4', // cyan
+  [LocationType.STAIRS]: '#F59E0B', // amber
+  [LocationType.SERVICE]: '#78716C', // stone
+  [LocationType.PRAYER_ROOM]: '#059669', // emerald-dark
+  [LocationType.SERVER_ROOM]: '#6366F1', // indigo
+  [LocationType.STORE_ROOM]: '#D97706', // amber-dark
+  [LocationType.LOCKERS]: '#0EA5E9', // sky
   [LocationType.CAFETERIA]: '#84CC16', // lime
-  [LocationType.OTHER]: '#6B7280', // neutral
+  [LocationType.WAITING_HALL]: '#E879F9', // fuchsia
+  [LocationType.ELECTRICAL_ROOM]: '#DC2626', // red-dark
 };
 
 // ============================================================================

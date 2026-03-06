@@ -79,6 +79,10 @@ interface EditorState {
   moveBeacon: (id: string, x: number, y: number) => void;
   removeBeacon: (id: string) => void;
 
+  // ----- Image size (for coordinate normalization) -----
+  imageSize: { width: number; height: number } | null;
+  setImageSize: (width: number, height: number) => void;
+
   // ----- Bulk -----
   loadGraph: (nodes: MapNode[], edges: MapEdge[], beacons: MapBeacon[]) => void;
   markClean: () => void;
@@ -100,6 +104,7 @@ const initialState = {
   pathSourceId: null as string | null,
   isDirty: false,
   isLoading: false,
+  imageSize: null as { width: number; height: number } | null,
 };
 
 // ============================================================================
@@ -142,7 +147,7 @@ export const useEditorStore = create<EditorState>()(
     // ----- Nodes -----
     addNode: (x, y, type = LocationType.CORRIDOR) => {
       const id = uuid();
-      const floorId = get().floor?.id ?? '';
+      const floorId = get().floor?.id ?? 0;
       set((s) => {
         s.nodes[id] = {
           id,
@@ -288,7 +293,7 @@ export const useEditorStore = create<EditorState>()(
     // ----- Beacons -----
     addBeacon: (x, y) => {
       const id = uuid();
-      const floorId = get().floor?.id ?? '';
+      const floorId = get().floor?.id ?? 0;
       set((s) => {
         s.beacons[id] = {
           id,
@@ -348,6 +353,11 @@ export const useEditorStore = create<EditorState>()(
     markClean: () =>
       set((s) => {
         s.isDirty = false;
+      }),
+
+    setImageSize: (width, height) =>
+      set((s) => {
+        s.imageSize = { width, height };
       }),
 
     reset: () => set(() => ({ ...initialState })),

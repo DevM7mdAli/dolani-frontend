@@ -1,3 +1,5 @@
+import type { GraphSyncPayload } from '@/types/map';
+
 import apiClient from '@/lib/axios';
 
 // ============================================================================
@@ -22,7 +24,10 @@ export interface LocationResponse {
     | 'PRAYER_ROOM'
     | 'SERVER_ROOM'
     | 'STORE_ROOM'
-    | 'LOCKERS';
+    | 'LOCKERS'
+    | 'CAFETERIA'
+    | 'WAITING_HALL'
+    | 'ELECTRICAL_ROOM';
   name: string;
   room_number: string | null;
   coordinate_x: number;
@@ -149,5 +154,13 @@ export const adminApi = {
    */
   deleteLocation: async (locationId: number | string): Promise<void> => {
     await apiClient.delete(`/admin/locations/${locationId}`);
+  },
+
+  syncGraph: async (payload: GraphSyncPayload): Promise<{ idMap: Record<string, number> }> => {
+    const response = await apiClient.post<{ idMap: Record<string, number> }>(
+      '/admin/graph/sync',
+      payload,
+    );
+    return response.data;
   },
 } as const;

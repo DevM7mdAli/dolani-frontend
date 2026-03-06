@@ -6,17 +6,24 @@ import { z } from 'zod';
 
 export enum LocationType {
   CLASSROOM = 'CLASSROOM',
-  CORRIDOR = 'CORRIDOR',
-  ELEVATOR = 'ELEVATOR',
-  STAIRS = 'STAIRS',
-  RESTROOM = 'RESTROOM',
-  EXIT = 'EXIT',
   OFFICE = 'OFFICE',
+  CORRIDOR = 'CORRIDOR',
   LAB = 'LAB',
-  AUDITORIUM = 'AUDITORIUM',
-  LIBRARY = 'LIBRARY',
+  THEATER = 'THEATER',
+  CONFERENCE = 'CONFERENCE',
+  EXIT = 'EXIT',
+  ELEVATOR = 'ELEVATOR',
+  MAIN_HALL = 'MAIN_HALL',
+  RESTROOM = 'RESTROOM',
+  STAIRS = 'STAIRS',
+  SERVICE = 'SERVICE',
+  PRAYER_ROOM = 'PRAYER_ROOM',
+  SERVER_ROOM = 'SERVER_ROOM',
+  STORE_ROOM = 'STORE_ROOM',
+  LOCKERS = 'LOCKERS',
   CAFETERIA = 'CAFETERIA',
-  OTHER = 'OTHER',
+  WAITING_HALL = 'WAITING_HALL',
+  ELECTRICAL_ROOM = 'ELECTRICAL_ROOM',
 }
 
 // ============================================================================
@@ -24,8 +31,8 @@ export enum LocationType {
 // ============================================================================
 
 export interface Floor {
-  id: string;
-  building_id: string;
+  id: number;
+  building_id: number;
   name: string;
   level: number;
   floor_plan_image_url: string | null;
@@ -37,7 +44,7 @@ export interface MapNode {
   name: string;
   room_number: string;
   type: LocationType;
-  floor_id: string;
+  floor_id: number;
   coordinate_x: number;
   coordinate_y: number;
   is_navigable: boolean;
@@ -60,7 +67,7 @@ export interface MapBeacon {
   location_id: string | null;
   coordinate_x: number;
   coordinate_y: number;
-  floor_id: string;
+  floor_id: number;
 }
 
 // ============================================================================
@@ -81,39 +88,38 @@ export interface SelectionState {
 }
 
 // ============================================================================
-// Sync payload — sent to the backend
+// Sync payload — sent to the backend (normalized 0–1 coordinates)
 // ============================================================================
 
 export const graphSyncSchema = z.object({
-  floor_id: z.string().uuid(),
+  floor_id: z.number().int().positive(),
   nodes: z.array(
     z.object({
-      id: z.string().uuid(),
+      client_id: z.string().uuid(),
       name: z.string().min(1),
-      room_number: z.string(),
+      room_number: z.string().optional(),
       type: z.nativeEnum(LocationType),
-      coordinate_x: z.number(),
-      coordinate_y: z.number(),
-      is_navigable: z.boolean(),
+      coordinate_x: z.number().min(0).max(1),
+      coordinate_y: z.number().min(0).max(1),
     }),
   ),
   edges: z.array(
     z.object({
-      id: z.string().uuid(),
-      source_id: z.string().uuid(),
-      target_id: z.string().uuid(),
+      client_id: z.string().uuid(),
+      source_client_id: z.string().uuid(),
+      target_client_id: z.string().uuid(),
       distance: z.number().positive(),
       is_accessible: z.boolean(),
     }),
   ),
   beacons: z.array(
     z.object({
-      id: z.string().uuid(),
+      client_id: z.string().uuid(),
       uuid: z.string(),
       name: z.string(),
-      location_id: z.string().uuid().nullable(),
-      coordinate_x: z.number(),
-      coordinate_y: z.number(),
+      linked_node_client_id: z.string().uuid().optional(),
+      coordinate_x: z.number().min(0).max(1),
+      coordinate_y: z.number().min(0).max(1),
     }),
   ),
 });
