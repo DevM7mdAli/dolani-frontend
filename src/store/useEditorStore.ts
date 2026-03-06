@@ -85,6 +85,35 @@ interface EditorState {
 
   // ----- Bulk -----
   loadGraph: (nodes: MapNode[], edges: MapEdge[], beacons: MapBeacon[]) => void;
+  loadGraphFromBackend: (
+    data: {
+      nodes: {
+        id: number;
+        name: string;
+        room_number: string | null;
+        type: string;
+        coordinate_x: number;
+        coordinate_y: number;
+      }[];
+      edges: {
+        id: number;
+        start_location_id: number;
+        end_location_id: number;
+        distance: number;
+        is_accessible: boolean;
+      }[];
+      beacons: {
+        id: number;
+        uuid: string;
+        name: string | null;
+        location_id: number;
+        coordinate_x: number;
+        coordinate_y: number;
+      }[];
+    },
+    imageWidth: number,
+    imageHeight: number,
+  ) => void;
   markClean: () => void;
   reset: () => void;
 }
@@ -346,6 +375,64 @@ export const useEditorStore = create<EditorState>()(
         for (const n of nodes) s.nodes[n.id] = n;
         for (const e of edges) s.edges[e.id] = e;
         for (const b of beacons) s.beacons[b.id] = b;
+        s.isDirty = false;
+        s.isLoading = false;
+      }),
+
+    loadGraphFromBackend: (data, imageWidth, imageHeight) =>
+      set((s) => {
+        const maxDim = Math.max(imageWidth, imageHeight);
+        const floorId = s.floor?.id ?? 0;
+
+        // Server ID → client UUID mapping for edge/beacon references
+        const serverToClient = new Map<number, string>();
+
+        s.nodes = {};
+        for (const n of data.nodes) {
+          const clientId = uuid();
+          serverToClient.set(n.id, clientId);
+          s.nodes[clientId] = {
+            id: clientId,
+            name: n.name,
+            room_number: n.room_number ?? '',
+            type: n.type as LocationType,
+            floor_id: floorId,
+            coordinate_x: n.coordinate_x * imageWidth,
+            coordinate_y: n.coordinate_y * imageHeight,
+            is_navigable: true,
+          };
+        }
+
+        s.edges = {};
+        for (const e of data.edges) {
+          const srcId = serverToClient.get(e.start_location_id);
+          const tgtId = serverToClient.get(e.end_location_id);
+          if (!srcId || !tgtId) continue;
+          const clientId = uuid();
+          s.edges[clientId] = {
+            id: clientId,
+            source_id: srcId,
+            target_id: tgtId,
+            distance: e.distance * maxDim,
+            is_accessible: e.is_accessible,
+          };
+        }
+
+        s.beacons = {};
+        for (const b of data.beacons) {
+          const linkedId = serverToClient.get(b.location_id) ?? null;
+          const clientId = uuid();
+          s.beacons[clientId] = {
+            id: clientId,
+            uuid: b.uuid,
+            name: b.name ?? '',
+            location_id: linkedId,
+            coordinate_x: b.coordinate_x * imageWidth,
+            coordinate_y: b.coordinate_y * imageHeight,
+            floor_id: floorId,
+          };
+        }
+
         s.isDirty = false;
         s.isLoading = false;
       }),

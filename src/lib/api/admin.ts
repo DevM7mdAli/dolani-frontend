@@ -156,6 +156,37 @@ export const adminApi = {
     await apiClient.delete(`/admin/locations/${locationId}`);
   },
 
+  getGraph: async (
+    floorId: number,
+  ): Promise<{
+    nodes: {
+      id: number;
+      name: string;
+      room_number: string | null;
+      type: LocationResponse['type'];
+      coordinate_x: number;
+      coordinate_y: number;
+    }[];
+    edges: {
+      id: number;
+      start_location_id: number;
+      end_location_id: number;
+      distance: number;
+      is_accessible: boolean;
+    }[];
+    beacons: {
+      id: number;
+      uuid: string;
+      name: string | null;
+      location_id: number;
+      coordinate_x: number;
+      coordinate_y: number;
+    }[];
+  }> => {
+    const response = await apiClient.get(`/admin/graph/${floorId}`);
+    return response.data;
+  },
+
   syncGraph: async (payload: GraphSyncPayload): Promise<{ idMap: Record<string, number> }> => {
     const response = await apiClient.post<{ idMap: Record<string, number> }>(
       '/admin/graph/sync',

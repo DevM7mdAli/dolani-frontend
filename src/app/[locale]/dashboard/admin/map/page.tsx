@@ -29,10 +29,16 @@ export default function MapPage() {
   const markClean = useEditorStore((s) => s.markClean);
   const viewport = useEditorStore((s) => s.viewport);
   const imageSize = useEditorStore((s) => s.imageSize);
+  const loadGraphFromBackend = useEditorStore((s) => s.loadGraphFromBackend);
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isHydrating, setIsHydrating] = useState(false);
   const [floors, setFloors] = useState<FloorResponse[]>([]);
+  const [graphCache, setGraphCache] = useState<Awaited<
+    ReturnType<typeof adminApi.getGraph>
+  > | null>(null);
 
+  // Fetch floor list on mount
   useEffect(() => {
     adminApi.getFloors().then((data) => {
       setFloors(data);
@@ -41,6 +47,30 @@ export default function MapPage() {
       }
     });
   }, [setFloor]);
+
+  // Fetch graph data when floor changes
+  useEffect(() => {
+    if (!floor) return;
+    setIsHydrating(true);
+    setGraphCache(null);
+    adminApi
+      .getGraph(floor.id)
+      .then((data) => {
+        setGraphCache(data);
+      })
+      .catch(() => {
+        setGraphCache(null);
+        setIsHydrating(false);
+      });
+  }, [floor?.id]);
+
+  // Hydrate store once BOTH graph data + image dimensions are available
+  useEffect(() => {
+    if (!graphCache || !imageSize) return;
+    loadGraphFromBackend(graphCache, imageSize.width, imageSize.height);
+    setGraphCache(null);
+    setIsHydrating(false);
+  }, [graphCache, imageSize, loadGraphFromBackend]);
 
   const handleSave = useCallback(async () => {
     if (!floor) {
@@ -164,6 +194,14 @@ export default function MapPage() {
         <div className="bg-muted/30 relative flex-1">
           <EditorToolbar onSave={handleSave} isSaving={isSaving} />
           <MapStage />
+          {isHydrating && (
+            <div className="bg-background/50 absolute inset-0 z-20 flex items-center justify-center backdrop-blur-sm">
+              <div className="text-muted-foreground flex flex-col items-center gap-2">
+                <div className="border-primary size-6 animate-spin rounded-full border-2 border-t-transparent" />
+                <span className="text-xs">{t('loading')}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Properties panel */}
