@@ -50,3 +50,17 @@ export interface RoomStatistics {
   classrooms: number;
   classroomsPercentage: number;
 }
+
+// ============================================================================
+// Faculty Configuration
+// ============================================================================
+
+export const FACULTY_DEPARTMENTS = [
+  'Computer Engineering',
+  'Computer Science',
+  'Network and Communications',
+  'Computer Information Systems',
+  'Student Affairs',
+] as const;
+
+export type FacultyDepartment = (typeof FACULTY_DEPARTMENTS)[number];

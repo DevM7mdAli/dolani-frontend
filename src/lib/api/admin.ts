@@ -65,6 +65,38 @@ export interface DepartmentResponse {
   updatedAt: string;
 }
 
+export interface ProfessorResponse {
+  id: number;
+  full_name: string;
+  email: string;
+  status: 'AVAILABLE' | 'NOT_AVAILABLE';
+  phone_number: string | null;
+  show_phone: boolean;
+  user_id: number;
+  location_id: number | null;
+  department_id: number;
+  office?: { name: string; room_number: string | null };
+  department: DepartmentResponse;
+  office_hours?: Array<{
+    id: number;
+    day: string;
+    start_time: string;
+    end_time: string;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 export interface CreateLocationRequest {
   name: string;
   room_number: string;
@@ -148,6 +180,81 @@ export const adminApi = {
    */
   getDepartments: async (): Promise<DepartmentResponse[]> => {
     const response = await apiClient.get<DepartmentResponse[]>('/admin/departments');
+    return response.data;
+  },
+
+  /**
+   * Get all professors with pagination and optional filters
+   * @param page - Page number (default 1)
+   * @param limit - Items per page (default 6)
+   * @param departmentId - Optional department ID filter
+   * @param status - Optional status filter (AVAILABLE or NOT_AVAILABLE)
+   * @param search - Optional search query (searches full_name, email, etc)
+   * @returns Paginated list of professors
+   */
+  getProfessors: async (
+    page: number = 1,
+    limit: number = 6,
+    departmentId?: number,
+    status?: 'AVAILABLE' | 'NOT_AVAILABLE',
+    search?: string,
+  ): Promise<PaginatedResponse<ProfessorResponse>> => {
+    const params: Record<string, unknown> = { page, limit };
+    if (departmentId) params.departmentId = departmentId;
+    if (status) params.status = status;
+    if (search) params.search = search;
+
+    const response = await apiClient.get<PaginatedResponse<ProfessorResponse>>('/faculty', {
+      params,
+    });
+    return response.data;
+  },
+
+  /**
+   * Create a new professor
+   * @param data - Professor creation data
+   * @returns Created professor
+   */
+  createProfessor: async (data: {
+    full_name: string;
+    email: string;
+    department_id: number;
+    phone_number?: string;
+    show_phone?: boolean;
+    location_id?: number | null;
+  }): Promise<ProfessorResponse> => {
+    const response = await apiClient.post<ProfessorResponse>('/faculty', data);
+    return response.data;
+  },
+
+  /**
+   * Update an existing professor
+   * @param professorId - ID of professor to update
+   * @param data - Partial professor data to update
+   * @returns Updated professor
+   */
+  updateProfessor: async (
+    professorId: number,
+    data: Partial<{
+      full_name: string;
+      email: string;
+      department_id: number;
+      phone_number?: string;
+      show_phone?: boolean;
+      location_id?: number | null;
+    }>,
+  ): Promise<ProfessorResponse> => {
+    const response = await apiClient.patch<ProfessorResponse>(`/faculty/${professorId}`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete a professor
+   * @param professorId - ID of professor to delete
+   * @returns Deletion confirmation message
+   */
+  deleteProfessor: async (professorId: number): Promise<{ message: string }> => {
+    const response = await apiClient.delete<{ message: string }>(`/faculty/${professorId}`);
     return response.data;
   },
 
