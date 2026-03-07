@@ -15,8 +15,8 @@ interface RoomTableProps {
   onEditRoom: (room: Room) => void;
   onCancelEdit: () => void;
   onEditFieldChange: (field: keyof Partial<Room>, value: string | number) => void;
-  onSaveEdit: () => void;
-  onDeleteRoom: (roomId: number | string) => Promise<void>;
+  onSaveEdit: () => Promise<void>;
+  onDeleteRoom: (roomId: number | string) => void;
   locationTypeDisplay: Record<LocationTypeValue, string>;
   locationTypes: LocationTypeValue[];
   currentPage: number;
@@ -28,6 +28,8 @@ interface RoomTableProps {
   onPrevPage: () => void;
   onNextPage: () => void;
   onPageClick: (page: number) => void;
+  isSaving?: boolean;
+  isDeleting?: boolean;
 }
 
 export function RoomTable({
@@ -52,11 +54,13 @@ export function RoomTable({
   onPrevPage,
   onNextPage,
   onPageClick,
+  isSaving = false,
+  isDeleting = false,
 }: RoomTableProps) {
   return (
     <Card className="overflow-hidden shadow-sm">
       <div className="border-b bg-white p-4">
-        <h4 className="font-bold text-teal-800">Rooms List</h4>
+        <h4 className="font-bold text-teal-800">Room Management Table</h4>
         <p className="text-xs text-gray-500">
           {isLoading ? 'Loading...' : error ? 'Load Error' : `${rooms.length} rooms`}
         </p>
@@ -82,21 +86,20 @@ export function RoomTable({
           </div>
         ) : (
           <table className="w-full text-left">
-            <thead className="border-b bg-gray-50 text-sm text-gray-600">
+            <thead className="border-b-primary border-b-2 bg-white text-sm">
               <tr>
-                <th className="p-4 text-left font-bold">Room Number</th>
-                <th className="p-4 text-left font-bold">Room Name</th>
-                <th className="p-4 text-left font-bold">Department</th>
-                <th className="p-4 text-left font-bold">Floor</th>
-                <th className="p-4 text-left font-bold">Type</th>
-                <th className="p-4 text-left font-bold">Building</th>
-                <th className="p-4 text-left font-bold">Status</th>
-                <th className="p-4 text-left font-bold">Actions</th>
+                <th className="text-primary p-4 text-left font-semibold">Room Number</th>
+                <th className="text-primary p-4 text-left font-semibold">Room Name</th>
+                <th className="text-primary p-4 text-left font-semibold">Department</th>
+                <th className="text-primary p-4 text-left font-semibold">Floor</th>
+                <th className="text-primary p-4 text-left font-semibold">Type</th>
+                <th className="text-primary p-4 text-left font-semibold">Building</th>
+                <th className="text-primary p-4 text-left font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y text-sm">
               {rooms.map((room) => (
-                <tr key={room.id} className="transition-colors hover:bg-gray-50">
+                <tr key={room.id} className="hover:bg-accent/30 transition-colors">
                   <td className="p-4 text-left">
                     {editingRoomId === room.id ? (
                       <Input
@@ -166,28 +169,29 @@ export function RoomTable({
                     <span className="text-[11px]">{room.building}</span>
                   </td>
                   <td className="p-4 text-left">
-                    <span className="rounded-full border border-green-200 bg-green-100 px-3 py-1 text-[10px] font-bold text-green-700">
-                      {room.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-left">
                     <div className="flex gap-2">
                       {editingRoomId === room.id ? (
                         <>
                           <Button
                             size="icon"
-                            className="h-8 w-8 bg-green-600 text-white hover:bg-green-700"
+                            className="h-8 w-8 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
                             onClick={onSaveEdit}
                             title="Save"
+                            disabled={isSaving}
                           >
-                            <span className="text-xs">✓</span>
+                            {isSaving ? (
+                              <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                            ) : (
+                              <span className="text-xs">✓</span>
+                            )}
                           </Button>
                           <Button
                             size="icon"
                             variant="outline"
-                            className="h-8 w-8 border-red-200 text-red-600 hover:bg-red-50"
+                            className="h-8 w-8 border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
                             onClick={onCancelEdit}
                             title="Cancel"
+                            disabled={isSaving}
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -197,20 +201,26 @@ export function RoomTable({
                           <Button
                             size="icon"
                             variant="outline"
-                            className="h-8 w-8 border-blue-100 text-blue-600 hover:bg-blue-50"
+                            className="h-8 w-8 border-blue-100 text-blue-600 hover:bg-blue-50 disabled:opacity-50"
                             onClick={() => onEditRoom(room)}
                             title="Edit"
+                            disabled={isDeleting}
                           >
                             <Edit2 className="h-4 w-4" />
                           </Button>
                           <Button
                             size="icon"
                             variant="outline"
-                            className="h-8 w-8 border-red-200 text-red-600 hover:bg-red-50"
+                            className="h-8 w-8 border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
                             onClick={() => onDeleteRoom(room.id)}
                             title="Delete"
+                            disabled={isDeleting}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            {isDeleting ? (
+                              <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></span>
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
                           </Button>
                         </>
                       )}
@@ -222,7 +232,7 @@ export function RoomTable({
           </table>
         )}
       </div>
-      <div className="flex items-center justify-between border-t bg-white p-4">
+      <div className="border-t-accent flex items-center justify-between border-t-2 bg-white p-4">
         <p className="text-xs font-medium text-gray-500">
           Showing {displayedRoomsCount > 0 ? startIndex + 1 : 0}-
           {Math.min(startIndex + pageSize, filteredRoomsCount)} of {filteredRoomsCount} rooms

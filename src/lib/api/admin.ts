@@ -86,9 +86,30 @@ export const adminApi = {
    * @returns Array of locations with related floor and department data
    */
   getLocations: async (floorId?: number): Promise<LocationResponse[]> => {
-    const params = floorId ? { floorId } : {};
-    const response = await apiClient.get<LocationResponse[]>('/admin/locations', { params });
-    return response.data;
+    const PAGE_LIMIT = 100; // max allowed by backend DTO
+    let page = 1;
+    let totalPages = 1;
+    const all: LocationResponse[] = [];
+
+    do {
+      const params: Record<string, unknown> = { limit: PAGE_LIMIT, page };
+      if (floorId) params.floorId = floorId;
+
+      const response = await apiClient.get<
+        { data: LocationResponse[]; meta: { totalPages: number } } | LocationResponse[]
+      >('/admin/locations', { params });
+
+      const raw = response.data;
+      if (Array.isArray(raw)) {
+        // Bare array — no pagination
+        return raw;
+      }
+      all.push(...raw.data);
+      totalPages = raw.meta.totalPages;
+      page++;
+    } while (page <= totalPages);
+
+    return all;
   },
 
   /**

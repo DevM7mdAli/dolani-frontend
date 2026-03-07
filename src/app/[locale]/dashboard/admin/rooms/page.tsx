@@ -12,6 +12,7 @@ import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
+import type { CreateLocationRequest } from '@/lib/api/admin';
 import { adminApi } from '@/lib/api/admin';
 
 // Constants
@@ -63,6 +64,9 @@ export default function RoomManagement() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSubmittingRoom, setIsSubmittingRoom] = useState(false);
   const [roomToEdit, setRoomToEdit] = useState<Room | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState<number | string | null>(null);
 
   const pageSize = 6;
   const queryClient = useQueryClient();
@@ -76,12 +80,12 @@ export default function RoomManagement() {
 
   const stats = data?.statistics || {
     total: 0,
-    active: 0,
-    activePercentage: 0,
     offices: 0,
     officesPercentage: 0,
     labs: 0,
     labsPercentage: 0,
+    classrooms: 0,
+    classroomsPercentage: 0,
   };
 
   const filteredRooms = useMemo(() => {
@@ -146,9 +150,31 @@ export default function RoomManagement() {
     }));
   };
 
-  const handleSaveEdit = (): void => {
-    console.log('Saving room:', editingRoomId, editingValues);
-    handleCancelEdit();
+  const handleSaveEdit = async (): Promise<void> => {
+    if (!editingRoomId) return;
+    setIsSaving(true);
+    try {
+      // Build update payload
+      const updatePayload: Record<string, unknown> = {};
+      if (editingValues.name !== undefined) updatePayload.name = editingValues.name;
+      if (editingValues.code !== undefined) updatePayload.room_number = editingValues.code;
+      if (editingValues.type !== undefined) {
+        // Convert display name back to LocationTypeValue
+        const typeKey = Object.entries(LOCATION_TYPE_DISPLAY).find(
+          ([, value]) => value === editingValues.type,
+        )?.[0];
+        if (typeKey) updatePayload.type = typeKey;
+      }
+
+      await adminApi.updateLocation(editingRoomId, updatePayload as Partial<CreateLocationRequest>);
+      queryClient.invalidateQueries({ queryKey: roomQueryKeys.list() });
+      handleCancelEdit();
+    } catch (err) {
+      console.error('Error saving room:', err);
+      alert('Failed to save room. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleNextPage = () => {
@@ -193,15 +219,27 @@ export default function RoomManagement() {
     }
   };
 
-  const handleDeleteRoom = async (roomId: number | string) => {
+  const handleDeleteRoom = (roomId: number | string) => {
+    setRoomToDelete(roomId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!roomToDelete) return;
+    setIsDeleting(true);
     try {
-      await adminApi.deleteLocation(roomId);
-      // Refetch rooms data
+      await adminApi.deleteLocation(roomToDelete);
       queryClient.invalidateQueries({ queryKey: roomQueryKeys.list() });
+      setRoomToDelete(null);
     } catch (err) {
       console.error('Error deleting room:', err);
-      throw err;
+      alert('Failed to delete room. Please try again.');
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setRoomToDelete(null);
   };
 
   return (
@@ -252,7 +290,44 @@ export default function RoomManagement() {
         onPrevPage={handlePrevPage}
         onNextPage={handleNextPage}
         onPageClick={handlePageClick}
+        isSaving={isSaving}
+        isDeleting={isDeleting}
       />
+
+      {roomToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg">
+            <h3 className="mb-2 text-lg font-bold text-gray-800">Confirm Delete</h3>
+            <p className="mb-6 text-sm text-gray-600">
+              Are you sure you want to delete this room? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+                onClick={handleCancelDelete}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-red-600 text-white hover:bg-red-700"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AddRoomModal
         isOpen={isAddModalOpen}

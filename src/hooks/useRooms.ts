@@ -74,7 +74,6 @@ function transformLocationToRoom(
     floor: floor?.floor_number || 0,
     type: displayMap[location.type] || location.type,
     building: building?.code || 'Unknown',
-    status: 'نشط',
   };
 }
 
@@ -83,18 +82,18 @@ function transformLocationToRoom(
  */
 function calculateStatistics(rooms: Room[]): RoomStatistics {
   const total = rooms.length;
-  const active = rooms.filter((r) => r.status === 'نشط').length;
   const offices = rooms.filter((r) => r.type === 'Office').length;
   const labs = rooms.filter((r) => r.type === 'Lab').length;
+  const classrooms = rooms.filter((r) => r.type === 'Classrooms').length;
 
   return {
     total,
-    active,
-    activePercentage: total > 0 ? Math.round((active / total) * 1000) / 10 : 0,
     offices,
     officesPercentage: total > 0 ? Math.round((offices / total) * 1000) / 10 : 0,
     labs,
     labsPercentage: total > 0 ? Math.round((labs / total) * 1000) / 10 : 0,
+    classrooms,
+    classroomsPercentage: total > 0 ? Math.round((classrooms / total) * 1000) / 10 : 0,
   };
 }
 
@@ -125,11 +124,11 @@ export function useRooms(options?: UseRoomsOptions) {
           adminApi.getDepartments(),
         ]);
 
-        // Normalise responses — backend may wrap arrays in an object
-        const locations = (Array.isArray(rawLocations) ? rawLocations : ((rawLocations as any)?.data ?? [])) as LocationResponse[];
-        const buildings = (Array.isArray(rawBuildings) ? rawBuildings : ((rawBuildings as any)?.data ?? [])) as BuildingResponse[];
-        const floors = (Array.isArray(rawFloors) ? rawFloors : ((rawFloors as any)?.data ?? [])) as FloorResponse[];
-        const departments = (Array.isArray(rawDepartments) ? rawDepartments : ((rawDepartments as any)?.data ?? [])) as DepartmentResponse[];
+        // API methods already return typed arrays directly
+        const locations = rawLocations as LocationResponse[];
+        const buildings = rawBuildings as BuildingResponse[];
+        const floors = rawFloors as FloorResponse[];
+        const departments = rawDepartments as DepartmentResponse[];
 
         // Build lookup maps
         const buildingMap = buildBuildingMap(buildings);

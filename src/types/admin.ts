@@ -35,7 +35,6 @@ export interface Room {
   floor: number;
   type: string; // Arabic translation
   building: string; // building code
-  status: string; // Always "نشط" (Active) for now
 }
 
 // ============================================================================
@@ -44,10 +43,10 @@ export interface Room {
 
 export interface RoomStatistics {
   total: number;
-  active: number;
-  activePercentage: number;
   offices: number;
   officesPercentage: number;
   labs: number;
   labsPercentage: number;
+  classrooms: number;
+  classroomsPercentage: number;
 }
