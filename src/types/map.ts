@@ -48,6 +48,7 @@ export interface MapNode {
   coordinate_x: number;
   coordinate_y: number;
   is_navigable: boolean;
+  department_id: number | null;
 }
 
 export interface MapEdge {
@@ -101,6 +102,7 @@ export const graphSyncSchema = z.object({
       type: z.nativeEnum(LocationType),
       coordinate_x: z.number().min(0).max(1),
       coordinate_y: z.number().min(0).max(1),
+      department_id: z.number().int().optional(),
     }),
   ),
   edges: z.array(

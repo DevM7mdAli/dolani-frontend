@@ -94,6 +94,7 @@ interface EditorState {
         type: string;
         coordinate_x: number;
         coordinate_y: number;
+        department_id: number | null;
       }[];
       edges: {
         id: number;
@@ -187,6 +188,7 @@ export const useEditorStore = create<EditorState>()(
           coordinate_x: x,
           coordinate_y: y,
           is_navigable: true,
+          department_id: null,
         };
         s.isDirty = true;
         s.selection = { type: 'node', id };
@@ -400,6 +402,7 @@ export const useEditorStore = create<EditorState>()(
             coordinate_x: n.coordinate_x * imageWidth,
             coordinate_y: n.coordinate_y * imageHeight,
             is_navigable: true,
+            department_id: n.department_id ?? null,
           };
         }
 

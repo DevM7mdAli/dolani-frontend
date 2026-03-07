@@ -166,6 +166,7 @@ export const adminApi = {
       type: LocationResponse['type'];
       coordinate_x: number;
       coordinate_y: number;
+      department_id: number | null;
     }[];
     edges: {
       id: number;

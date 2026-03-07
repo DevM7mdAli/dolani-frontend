@@ -169,7 +169,8 @@
       "beaconName": "اسم المنارة",
       "beaconUuid": "UUID المنارة",
       "linkedNode": "العقدة المرتبطة",
-      "none": "— لا شيء —"
+      "none": "— لا شيء —",
+      "department": "القسم"
     }
   },
   "IT": {

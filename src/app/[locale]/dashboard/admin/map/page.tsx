@@ -96,6 +96,7 @@ export default function MapPage() {
         type: n.type,
         coordinate_x: n.coordinate_x / width,
         coordinate_y: n.coordinate_y / height,
+        department_id: n.department_id ?? undefined,
       })),
       edges: Object.values(edges).map((e) => ({
         client_id: e.id,

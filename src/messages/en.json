@@ -169,7 +169,8 @@
       "beaconName": "Beacon Name",
       "beaconUuid": "Beacon UUID",
       "linkedNode": "Linked Node",
-      "none": "— None —"
+      "none": "— None —",
+      "department": "Department"
     }
   },
   "IT": {
