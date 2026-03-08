@@ -107,6 +107,35 @@ export interface CreateLocationRequest {
   coordinate_y?: number;
 }
 
+export interface BeaconResponse {
+  id: number;
+  uuid: string;
+  name: string | null;
+  operating: boolean;
+  signal_count: number;
+  coordinate_x: number;
+  coordinate_y: number;
+  location_id: number;
+  floor_id: number;
+  department_id: number | null;
+  location?: LocationResponse;
+  floor?: FloorResponse;
+  department?: DepartmentResponse | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateBeaconRequest {
+  uuid: string;
+  name?: string;
+  operating?: boolean;
+  location_id: number;
+  floor_id: number;
+  department_id?: number;
+  coordinate_x: number;
+  coordinate_y: number;
+}
+
 // ============================================================================
 // Admin API Endpoints
 // ============================================================================
@@ -352,5 +381,69 @@ export const adminApi = {
       payload,
     );
     return response.data;
+  },
+
+  /**
+   * Get all beacons with optional location filter
+   * @param locationId - Optional location ID to filter by
+   * @returns Array of beacons with related location, floor, and department data
+   */
+  getBeacons: async (locationId?: number): Promise<BeaconResponse[]> => {
+    const PAGE_LIMIT = 100;
+    let page = 1;
+    let totalPages = 1;
+    const all: BeaconResponse[] = [];
+
+    do {
+      const params: Record<string, unknown> = { limit: PAGE_LIMIT, page };
+      if (locationId) params.locationId = locationId;
+
+      const response = await apiClient.get<
+        { data: BeaconResponse[]; meta: { totalPages: number } } | BeaconResponse[]
+      >('/admin/beacons', { params });
+
+      const raw = response.data;
+      if (Array.isArray(raw)) {
+        return raw;
+      }
+      all.push(...raw.data);
+      totalPages = raw.meta.totalPages;
+      page++;
+    } while (page <= totalPages);
+
+    return all;
+  },
+
+  /**
+   * Create a new beacon
+   * @param data - Beacon creation data
+   * @returns Created beacon
+   */
+  createBeacon: async (data: CreateBeaconRequest): Promise<BeaconResponse> => {
+    const response = await apiClient.post<BeaconResponse>('/admin/beacons', data);
+    return response.data;
+  },
+
+  /**
+   * Update an existing beacon
+   * @param beaconId - ID of the beacon to update
+   * @param data - Partial beacon data to update
+   * @returns Updated beacon
+   */
+  updateBeacon: async (
+    beaconId: number,
+    data: Partial<CreateBeaconRequest>,
+  ): Promise<BeaconResponse> => {
+    const response = await apiClient.patch<BeaconResponse>(`/admin/beacons/${beaconId}`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete a beacon
+   * @param beaconId - ID of beacon to delete
+   * @returns Success response
+   */
+  deleteBeacon: async (beaconId: number): Promise<void> => {
+    await apiClient.delete(`/admin/beacons/${beaconId}`);
   },
 } as const;
