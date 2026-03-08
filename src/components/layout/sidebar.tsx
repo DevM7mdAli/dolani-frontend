@@ -4,15 +4,15 @@ import { useLogout } from '@/hooks/useAuth';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { useUIStore } from '@/store/useUIStore';
 import {
+  AlertTriangle,
   ChevronLeft,
   ChevronRight,
   DoorOpen,
-  FileText,
+  Globe,
   LayoutDashboard,
   LogOut,
   Map,
   Radio,
-  Settings,
   Users,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -43,8 +43,6 @@ export function Sidebar() {
     { href: '/dashboard/admin/rooms', label: t('rooms'), icon: DoorOpen },
     { href: '/dashboard/admin/doctors', label: t('faculty'), icon: Users },
     { href: '/dashboard/admin/beacons', label: t('beacons'), icon: Radio },
-    { href: '/dashboard/admin/reports', label: t('reports'), icon: FileText },
-    { href: '/dashboard/admin/settings', label: t('settings'), icon: Settings },
   ];
 
   return (
@@ -106,8 +104,6 @@ const segmentKeys: Record<string, string> = {
   rooms: 'rooms',
   doctors: 'faculty',
   beacons: 'beacons',
-  reports: 'reports',
-  settings: 'settings',
 };
 
 export function AdminHeader() {
@@ -115,10 +111,26 @@ export function AdminHeader() {
   const segment = usePathname().split('/').pop() ?? 'admin';
 
   return (
-    <header className="border-border flex h-14 items-center border-b bg-white px-6 shadow-sm">
+    <header className="border-border flex h-14 items-center justify-between border-b bg-white px-6 shadow-sm">
       <h2 className="text-primary text-lg font-semibold">
         {t(segmentKeys[segment] ?? 'analytics')}
       </h2>
+      <div className="flex items-center gap-4">
+        {/* Language Toggle */}
+        <button
+          onClick={() => {}}
+          title="Switch Language"
+          className="text-muted-foreground hover:text-primary transition-colors"
+        >
+          <Globe className="h-5 w-5" />
+        </button>
+
+        {/* Emergency Mode Button */}
+        <Button size="sm" className="gap-2 bg-red-600 text-white hover:bg-red-700">
+          <AlertTriangle className="h-4 w-4" />
+          Activate Emergency Mode
+        </Button>
+      </div>
     </header>
   );
 }
