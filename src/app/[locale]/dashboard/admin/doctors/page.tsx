@@ -40,7 +40,11 @@ export default function FacultyPage() {
   const { data: departments = [] } = useDepartments();
 
   // Fetch filtered data for the table
-  const { data: professorData } = useAdminProfessors({
+  const {
+    data: professorData,
+    isLoading,
+    error,
+  } = useAdminProfessors({
     page: currentPage,
     limit: itemsPerPage,
     departmentId: selectedDeptFilter === 'all' ? undefined : selectedDeptFilter,
@@ -214,10 +218,10 @@ export default function FacultyPage() {
       />
       <FacultyTable
         faculty={transformedFaculty}
+        isLoading={isLoading}
+        error={error}
         currentPage={currentPage}
         totalPages={totalPages}
-        itemsPerPage={itemsPerPage}
-        filteredCount={professorData?.meta.total || 0}
         onPrevPage={handlePrevPage}
         onNextPage={handleNextPage}
         onPageClick={handlePageClick}
