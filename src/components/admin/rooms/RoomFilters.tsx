@@ -3,6 +3,13 @@ import { Search } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 import type { DepartmentResponse } from '@/lib/api/admin';
 
@@ -29,6 +36,19 @@ export function RoomFilters({
   locationTypeDisplay,
   locationTypes,
 }: RoomFiltersProps) {
+  // Helper to get department name by ID
+  const getDepartmentName = (deptId: number | 'all'): string => {
+    if (deptId === 'all') return 'All Departments';
+    const dept = departments.find((d) => d.id === deptId);
+    return dept?.name || 'Select department';
+  };
+
+  // Helper to get type label
+  const getTypeLabel = (type: string | 'all'): string => {
+    if (type === 'all') return 'All Types';
+    return locationTypeDisplay[type as LocationTypeValue] || 'Select type';
+  };
+
   return (
     <Card className="mb-8 p-6 shadow-sm">
       <div className="flex flex-col gap-4">
@@ -48,30 +68,32 @@ export function RoomFilters({
               onChange={(e) => onSearchChange(e.target.value)}
             />
           </div>
-          <select
-            className="min-w-40 rounded-md border border-gray-200 bg-gray-50 p-2 text-sm text-gray-600"
-            value={selectedDeptFilter}
-            onChange={(e) => onDeptFilterChange(e.target.value)}
-          >
-            <option value="all">All Departments</option>
-            {departments.map((dept) => (
-              <option key={dept.id} value={dept.id}>
-                {dept.name}
-              </option>
-            ))}
-          </select>
-          <select
-            className="min-w-40 rounded-md border border-gray-200 bg-gray-50 p-2 text-sm text-gray-600"
-            value={selectedTypeFilter}
-            onChange={(e) => onTypeFilterChange(e.target.value)}
-          >
-            <option value="all">All Types</option>
-            {locationTypes.map((type) => (
-              <option key={type} value={type}>
-                {locationTypeDisplay[type]}
-              </option>
-            ))}
-          </select>
+          <Select value={String(selectedDeptFilter)} onValueChange={onDeptFilterChange}>
+            <SelectTrigger className="min-w-40">
+              <SelectValue>{getDepartmentName(selectedDeptFilter)}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Departments</SelectItem>
+              {departments.map((dept) => (
+                <SelectItem key={dept.id} value={String(dept.id)}>
+                  {dept.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedTypeFilter} onValueChange={onTypeFilterChange}>
+            <SelectTrigger className="min-w-40">
+              <SelectValue>{getTypeLabel(selectedTypeFilter)}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              {locationTypes.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {locationTypeDisplay[type]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </Card>

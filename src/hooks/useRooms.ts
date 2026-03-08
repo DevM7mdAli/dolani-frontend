@@ -25,6 +25,13 @@ export type { Room, RoomStatistics } from '@/types/admin';
 export const roomQueryKeys = {
   all: ['rooms'] as const,
   list: () => [...roomQueryKeys.all, 'list'] as const,
+  paginated: (
+    page?: number,
+    limit?: number,
+    departmentId?: number,
+    type?: string,
+    search?: string,
+  ) => [...roomQueryKeys.all, 'paginated', { page, limit, departmentId, type, search }] as const,
 } as const;
 
 // ============================================================================
@@ -106,6 +113,16 @@ export interface UseRoomsOptions {
   displayMap?: Record<string, string>;
 }
 
+export interface UseRoomsPaginatedOptions {
+  page?: number;
+  limit?: number;
+  departmentId?: number;
+  type?: string;
+  search?: string;
+  enabled?: boolean;
+  displayMap?: Record<string, string>;
+}
+
 export function useRooms(options?: UseRoomsOptions) {
   const displayMap = options?.displayMap || {};
 
@@ -146,6 +163,76 @@ export function useRooms(options?: UseRoomsOptions) {
         return { rooms, statistics };
       } catch (err) {
         console.error('Error fetching rooms:', err);
+        throw err;
+      }
+    },
+  });
+}
+
+/**
+ * Hook for paginated rooms data
+ */
+export function useRoomsPaginated(options: UseRoomsPaginatedOptions = {}) {
+  const {
+    page = 1,
+    limit = 9,
+    departmentId,
+    type,
+    search,
+    enabled = true,
+    displayMap = {},
+  } = options;
+
+  return useQuery<
+    { rooms: Room[]; statistics: RoomStatistics; meta: { totalPages: number; total: number } },
+    AxiosError
+  >({
+    queryKey: roomQueryKeys.paginated(page, limit, departmentId, type, search),
+    enabled,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+    queryFn: async () => {
+      try {
+        // Fetch paginated locations and all necessary data in parallel
+        const [paginatedData, rawBuildings, rawFloors, rawDepartments, allLocations] =
+          await Promise.all([
+            adminApi.getLocationsPaginated(page, limit, undefined, departmentId, type, search),
+            adminApi.getBuildings(),
+            adminApi.getFloors(),
+            adminApi.getDepartments(),
+            adminApi.getLocations(), // For statistics
+          ]);
+
+        const buildings = rawBuildings as BuildingResponse[];
+        const floors = rawFloors as FloorResponse[];
+        const departments = rawDepartments as DepartmentResponse[];
+
+        // Build lookup maps
+        const buildingMap = buildBuildingMap(buildings);
+        const floorMap = buildFloorMap(floors);
+        const departmentMap = buildDepartmentMap(departments);
+
+        // Transform paginated locations to rooms
+        const rooms: Room[] = paginatedData.data.map((location) =>
+          transformLocationToRoom(location, buildingMap, floorMap, departmentMap, displayMap),
+        );
+
+        // Calculate statistics from all locations (not just current page)
+        const allRooms: Room[] = (allLocations as LocationResponse[]).map((location) =>
+          transformLocationToRoom(location, buildingMap, floorMap, departmentMap, displayMap),
+        );
+        const statistics = calculateStatistics(allRooms);
+
+        return {
+          rooms,
+          statistics,
+          meta: {
+            totalPages: paginatedData.meta.totalPages,
+            total: paginatedData.meta.total,
+          },
+        };
+      } catch (err) {
+        console.error('Error fetching paginated rooms:', err);
         throw err;
       }
     },

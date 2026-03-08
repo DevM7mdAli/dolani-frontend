@@ -1,34 +1,20 @@
 import type { Room } from '@/types/admin';
-import type { LocationTypeValue } from '@/types/admin';
-import { ChevronLeft, ChevronRight, Edit2, Trash2, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Edit2, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 
 interface RoomTableProps {
   rooms: Room[];
   isLoading: boolean;
   error: Error | null;
-  editingRoomId: number | string | null;
-  editingValues: Partial<Room>;
   onEditRoom: (room: Room) => void;
-  onCancelEdit: () => void;
-  onEditFieldChange: (field: keyof Partial<Room>, value: string | number) => void;
-  onSaveEdit: () => Promise<void>;
   onDeleteRoom: (roomId: number | string) => void;
-  locationTypeDisplay: Record<LocationTypeValue, string>;
-  locationTypes: LocationTypeValue[];
   currentPage: number;
   totalPages: number;
-  displayedRoomsCount: number;
-  startIndex: number;
-  pageSize: number;
-  filteredRoomsCount: number;
   onPrevPage: () => void;
   onNextPage: () => void;
   onPageClick: (page: number) => void;
-  isSaving?: boolean;
   isDeleting?: boolean;
 }
 
@@ -36,34 +22,19 @@ export function RoomTable({
   rooms,
   isLoading,
   error,
-  editingRoomId,
-  editingValues,
   onEditRoom,
-  onCancelEdit,
-  onEditFieldChange,
-  onSaveEdit,
   onDeleteRoom,
-  locationTypeDisplay,
-  locationTypes,
   currentPage,
   totalPages,
-  displayedRoomsCount,
-  startIndex,
-  pageSize,
-  filteredRoomsCount,
   onPrevPage,
   onNextPage,
   onPageClick,
-  isSaving = false,
   isDeleting = false,
 }: RoomTableProps) {
   return (
     <Card className="overflow-hidden shadow-sm">
       <div className="border-b bg-white p-4">
         <h4 className="font-bold text-teal-800">Room Management Table</h4>
-        <p className="text-xs text-gray-500">
-          {isLoading ? 'Loading...' : error ? 'Load Error' : `${rooms.length} rooms`}
-        </p>
       </div>
       <div className="overflow-x-auto">
         {isLoading && rooms.length === 0 ? (
@@ -101,129 +72,47 @@ export function RoomTable({
               {rooms.map((room) => (
                 <tr key={room.id} className="hover:bg-accent/30 transition-colors">
                   <td className="p-4 text-left">
-                    {editingRoomId === room.id ? (
-                      <Input
-                        type="text"
-                        value={editingValues.code || ''}
-                        onChange={(e) => onEditFieldChange('code', e.target.value)}
-                        className="mt-1"
-                      />
-                    ) : (
-                      <span className="font-mono font-semibold text-gray-700">{room.code}</span>
-                    )}
+                    <span className="font-mono font-semibold text-gray-700">{room.code}</span>
                   </td>
                   <td className="p-4 text-left">
-                    {editingRoomId === room.id ? (
-                      <Input
-                        type="text"
-                        value={editingValues.name || ''}
-                        onChange={(e) => onEditFieldChange('name', e.target.value)}
-                        className="mt-1"
-                      />
-                    ) : (
-                      <span className="font-medium text-gray-800">{room.name}</span>
-                    )}
+                    <span className="font-medium text-gray-800">{room.name}</span>
                   </td>
                   <td className="p-4 text-left font-medium text-gray-600">{room.dept}</td>
                   <td className="p-4 text-left text-gray-500">
-                    {editingRoomId === room.id ? (
-                      <Input
-                        type="number"
-                        value={editingValues.floor || ''}
-                        onChange={(e) => onEditFieldChange('floor', parseInt(e.target.value))}
-                        className="mt-1"
-                      />
-                    ) : (
-                      <span>{room.floor}</span>
-                    )}
+                    <span>{room.floor}</span>
                   </td>
                   <td className="p-4 text-left text-gray-500">
-                    {editingRoomId === room.id ? (
-                      <select
-                        className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                        value={
-                          Object.keys(locationTypeDisplay).find(
-                            (key) =>
-                              locationTypeDisplay[key as LocationTypeValue] === editingValues.type,
-                          ) || ''
-                        }
-                        onChange={(e) => {
-                          const selectedKey = e.target.value as LocationTypeValue;
-                          onEditFieldChange(
-                            'type',
-                            locationTypeDisplay[selectedKey] || e.target.value,
-                          );
-                        }}
-                      >
-                        {locationTypes.map((type) => (
-                          <option key={type} value={type}>
-                            {locationTypeDisplay[type]}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <span className="text-xs">{room.type}</span>
-                    )}
+                    <span className="text-xs">{room.type}</span>
                   </td>
                   <td className="p-4 text-left text-gray-500">
                     <span className="text-[11px]">{room.building}</span>
                   </td>
                   <td className="p-4 text-left">
                     <div className="flex gap-2">
-                      {editingRoomId === room.id ? (
-                        <>
-                          <Button
-                            size="icon"
-                            className="h-8 w-8 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
-                            onClick={onSaveEdit}
-                            title="Save"
-                            disabled={isSaving}
-                          >
-                            {isSaving ? (
-                              <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-                            ) : (
-                              <span className="text-xs">✓</span>
-                            )}
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-8 w-8 border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
-                            onClick={onCancelEdit}
-                            title="Cancel"
-                            disabled={isSaving}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-8 w-8 border-blue-100 text-blue-600 hover:bg-blue-50 disabled:opacity-50"
-                            onClick={() => onEditRoom(room)}
-                            title="Edit"
-                            disabled={isDeleting}
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-8 w-8 border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
-                            onClick={() => onDeleteRoom(room.id)}
-                            title="Delete"
-                            disabled={isDeleting}
-                          >
-                            {isDeleting ? (
-                              <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></span>
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </>
-                      )}
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8 border-blue-100 text-blue-600 hover:bg-blue-50 disabled:opacity-50"
+                        onClick={() => onEditRoom(room)}
+                        title="Edit"
+                        disabled={isDeleting}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8 border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                        onClick={() => onDeleteRoom(room.id)}
+                        title="Delete"
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? (
+                          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></span>
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -232,11 +121,7 @@ export function RoomTable({
           </table>
         )}
       </div>
-      <div className="border-t-accent flex items-center justify-between border-t-2 bg-white p-4">
-        <p className="text-xs font-medium text-gray-500">
-          Showing {displayedRoomsCount > 0 ? startIndex + 1 : 0}-
-          {Math.min(startIndex + pageSize, filteredRoomsCount)} of {filteredRoomsCount} rooms
-        </p>
+      <div className="border-t-accent flex items-center justify-end border-t-2 bg-white p-4">
         <div className="flex items-center gap-1">
           <Button
             variant="outline"
@@ -248,21 +133,58 @@ export function RoomTable({
             <ChevronLeft className="h-3 w-3" />
             <span>Previous</span>
           </Button>
-          {Array.from({ length: Math.min(3, totalPages) }).map((_, i) => {
-            const pageNum = currentPage - 1 + i;
-            if (pageNum < 1 || pageNum > totalPages) return null;
-            return (
-              <Button
-                key={pageNum}
-                variant={pageNum === currentPage ? 'default' : 'outline'}
-                size="icon"
-                className={`h-8 w-8 text-xs ${pageNum === currentPage ? 'bg-teal-800' : ''}`}
-                onClick={() => onPageClick(pageNum)}
-              >
-                {pageNum}
-              </Button>
-            );
-          })}
+          {(() => {
+            const pages: (number | 'ellipsis')[] = [];
+
+            if (totalPages <= 7) {
+              // Show all pages if 7 or fewer
+              for (let i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+              // Always show first page
+              pages.push(1);
+
+              if (currentPage > 3) {
+                pages.push('ellipsis');
+              }
+
+              // Show pages around current page
+              const start = Math.max(2, currentPage - 1);
+              const end = Math.min(totalPages - 1, currentPage + 1);
+
+              for (let i = start; i <= end; i++) {
+                pages.push(i);
+              }
+
+              if (currentPage < totalPages - 2) {
+                pages.push('ellipsis');
+              }
+
+              // Always show last page
+              pages.push(totalPages);
+            }
+
+            return pages.map((page, idx) => {
+              if (page === 'ellipsis') {
+                return (
+                  <span key={`ellipsis-${idx}`} className="px-2 text-gray-400">
+                    ...
+                  </span>
+                );
+              }
+
+              return (
+                <Button
+                  key={page}
+                  variant={page === currentPage ? 'default' : 'outline'}
+                  size="icon"
+                  className={`h-8 w-8 text-xs ${page === currentPage ? 'bg-primary' : ''}`}
+                  onClick={() => onPageClick(page)}
+                >
+                  {page}
+                </Button>
+              );
+            });
+          })()}
           <Button
             variant="outline"
             size="sm"

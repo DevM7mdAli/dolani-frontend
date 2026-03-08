@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-import { X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 import type { DepartmentResponse, FloorResponse } from '@/lib/api/admin';
 
@@ -51,46 +51,38 @@ export function AddRoomModal({
   });
 
   const [error, setError] = useState('');
+  const hasInitialized = useRef(false);
 
-  // Form initialization: updates form state when modal opens with edit data
+  // Initialize form when modal opens
   useEffect(() => {
-    if (!isOpen) {
-      return;
+    if (!isOpen) return;
+
+    if (isEditMode && roomToEdit && !hasInitialized.current) {
+      const floor = floors.find((f) => f.floor_number === roomToEdit.floor);
+      const department =
+        roomToEdit.dept !== 'Not Assigned'
+          ? departments.find((d) => d.name === roomToEdit.dept)
+          : null;
+
+      // eslint-disable-next-line
+      setFormData({
+        name: roomToEdit.name,
+        room_number: roomToEdit.code,
+        type: Object.keys(locationTypeDisplay).find(
+          (key) => locationTypeDisplay[key as LocationTypeValue] === roomToEdit.type,
+        ) as LocationTypeValue,
+        floor_id: floor?.id.toString() || '',
+        department_id: department?.id.toString() || '',
+      });
+      hasInitialized.current = true;
     }
-
-    // Defer state update to avoid synchronous setState in effect
-    const timer = setTimeout(() => {
-      // Only set form data when modal opens with a specific room to edit
-      if (isEditMode && roomToEdit) {
-        const floor = floors.find((f) => f.floor_number === roomToEdit.floor);
-        const department =
-          roomToEdit.dept !== 'Not Assigned'
-            ? departments.find((d) => d.name === roomToEdit.dept)
-            : null;
-
-        setFormData({
-          name: roomToEdit.name,
-          room_number: roomToEdit.code,
-          type: Object.keys(locationTypeDisplay).find(
-            (key) => locationTypeDisplay[key as LocationTypeValue] === roomToEdit.type,
-          ) as LocationTypeValue,
-          floor_id: floor?.id.toString() || '',
-          department_id: department?.id.toString() || '',
-        });
-      }
-    }, 0);
-
-    return () => clearTimeout(timer);
   }, [isOpen, isEditMode, roomToEdit, floors, departments, locationTypeDisplay]);
 
-  // Reset form when modal closes
+  // Reset initialization flag when modal closes
   useEffect(() => {
-    if (isOpen) {
-      return;
-    }
-
-    // Defer state update to avoid synchronous setState in effect
-    const timer = setTimeout(() => {
+    if (!isOpen) {
+      hasInitialized.current = false;
+      // eslint-disable-next-line
       setFormData({
         name: '',
         room_number: '',
@@ -99,9 +91,7 @@ export function AddRoomModal({
         department_id: '',
       });
       setError('');
-    }, 0);
-
-    return () => clearTimeout(timer);
+    }
   }, [isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -153,134 +143,119 @@ export function AddRoomModal({
   if (!isOpen) return null;
 
   return (
-    <>
-      <div className="fixed inset-0 z-40 backdrop-blur-sm" />
-      <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
-        <div className="pointer-events-auto w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">
-              {isEditMode ? 'Edit Room' : 'Add New Room'}
-            </h2>
-            <button
-              onClick={onClose}
+    <Dialog open={isOpen} onOpenChange={onClose} key={`${isEditMode}-${roomToEdit?.id || 'new'}`}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{isEditMode ? 'Edit Room' : 'Add New Room'}</DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>}
+
+          <div className="space-y-2">
+            <Label htmlFor="room_name">Room Name</Label>
+            <Input
+              id="room_name"
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="e.g., Computer Lab A"
               disabled={isSubmitting}
-              className="rounded-full p-1 hover:bg-gray-100"
-            >
-              <X className="h-5 w-5 text-gray-600" />
-            </button>
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Room Name</label>
-              <Input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="e.g., Computer Lab A"
-                className="mt-1"
-                disabled={isSubmitting}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="room_number">Room Number/Code</Label>
+            <Input
+              id="room_number"
+              type="text"
+              name="room_number"
+              value={formData.room_number}
+              onChange={handleChange}
+              placeholder="e.g., A101"
+              disabled={isSubmitting}
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Room Number/Code</label>
-              <Input
-                type="text"
-                name="room_number"
-                value={formData.room_number}
-                onChange={handleChange}
-                placeholder="e.g., A101"
-                className="mt-1"
-                disabled={isSubmitting}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="floor_id">Floor</Label>
+            <select
+              id="floor_id"
+              name="floor_id"
+              value={formData.floor_id}
+              onChange={handleChange}
+              className="border-input bg-background w-full rounded-md border px-3 py-2"
+              disabled={isSubmitting}
+            >
+              <option value="">Select Floor</option>
+              {floors.map((floor) => (
+                <option key={floor.id} value={floor.id}>
+                  Floor {floor.floor_number}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Floor</label>
-              <select
-                name="floor_id"
-                value={formData.floor_id}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-md border border-gray-300 p-2 text-sm"
-                disabled={isSubmitting}
-              >
-                <option value="">Select Floor</option>
-                {floors.map((floor) => (
-                  <option key={floor.id} value={floor.id}>
-                    Floor {floor.floor_number}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="type">Type</Label>
+            <select
+              id="type"
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              className="border-input bg-background w-full rounded-md border px-3 py-2"
+              disabled={isSubmitting}
+            >
+              {locationTypes.map((type) => (
+                <option key={type} value={type}>
+                  {locationTypeDisplay[type]}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Type</label>
-              <select
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-md border border-gray-300 p-2 text-sm"
-                disabled={isSubmitting}
-              >
-                {locationTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {locationTypeDisplay[type]}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="department_id">Department (Optional)</Label>
+            <select
+              id="department_id"
+              name="department_id"
+              value={formData.department_id}
+              onChange={handleChange}
+              className="border-input bg-background w-full rounded-md border px-3 py-2"
+              disabled={isSubmitting}
+            >
+              <option value="">Select Department</option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Department (Optional)
-              </label>
-              <select
-                name="department_id"
-                value={formData.department_id}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-md border border-gray-300 p-2 text-sm"
-                disabled={isSubmitting}
-              >
-                <option value="">Select Department</option>
-                {departments.map((dept) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>}
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={isSubmitting}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1 bg-teal-700 text-white hover:bg-teal-800"
-                disabled={isSubmitting}
-              >
-                {isSubmitting
-                  ? isEditMode
-                    ? 'Updating...'
-                    : 'Adding...'
-                  : isEditMode
-                    ? 'Update Room'
-                    : 'Add Room'}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </>
+          <div className="flex gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting} className="flex-1">
+              {isSubmitting
+                ? isEditMode
+                  ? 'Updating...'
+                  : 'Adding...'
+                : isEditMode
+                  ? 'Update Room'
+                  : 'Add Room'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

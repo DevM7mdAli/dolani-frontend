@@ -145,6 +145,36 @@ export const adminApi = {
   },
 
   /**
+   * Get paginated locations (rooms) with optional filters
+   * @param page - Page number (default 1)
+   * @param limit - Items per page (default 9)
+   * @param floorId - Optional floor ID filter
+   * @param departmentId - Optional department ID filter
+   * @param type - Optional location type filter
+   * @param search - Optional search query
+   * @returns Paginated list of locations
+   */
+  getLocationsPaginated: async (
+    page: number = 1,
+    limit: number = 9,
+    floorId?: number,
+    departmentId?: number,
+    type?: string,
+    search?: string,
+  ): Promise<PaginatedResponse<LocationResponse>> => {
+    const params: Record<string, unknown> = { page, limit };
+    if (floorId) params.floorId = floorId;
+    if (departmentId) params.departmentId = departmentId;
+    if (type) params.type = type;
+    if (search) params.search = search;
+
+    const response = await apiClient.get<PaginatedResponse<LocationResponse>>('/admin/locations', {
+      params,
+    });
+    return response.data;
+  },
+
+  /**
    * Create a new location (room)
    * @param data - Location creation data
    * @returns Created location
