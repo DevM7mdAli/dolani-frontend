@@ -137,6 +137,7 @@
     "nodeProperties": "خصائص العقدة",
     "edgeProperties": "خصائص المسار",
     "beaconProperties": "خصائص المنارة",
+    "loading": "...يرجى الانتظار، نقوم بتحميل النقاط",
     "tools": {
       "select": "تحديد",
       "node": "إضافة عقدة",
@@ -168,7 +169,8 @@
       "beaconName": "اسم المنارة",
       "beaconUuid": "UUID المنارة",
       "linkedNode": "العقدة المرتبطة",
-      "none": "— لا شيء —"
+      "none": "— لا شيء —",
+      "department": "القسم"
     }
   },
   "IT": {

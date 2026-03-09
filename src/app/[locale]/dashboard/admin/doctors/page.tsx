@@ -1,321 +1,264 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import { FileText, Plus, Search, Trash2 } from 'lucide-react';
+import { DeleteFacultyDialog } from '@/components/admin/faculty/DeleteFacultyDialog';
+import { FacultyFilters } from '@/components/admin/faculty/FacultyFilters';
+import { FacultyModal } from '@/components/admin/faculty/FacultyModal';
+import { FacultyStatsCards } from '@/components/admin/faculty/FacultyStatsCards';
+import { FacultyTable } from '@/components/admin/faculty/FacultyTable';
+import { useDepartments } from '@/hooks/useDepartments';
+import { useAdminProfessors } from '@/hooks/useProfessors';
+import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 
-const FACULTY_DATA = [
-  {
-    id: 1,
-    initials: 'ا ح',
-    name: 'د. أحمد حسن',
-    engName: 'Dr. Ahmed Hassan',
-    department: 'علوم الحاسب',
-    office: 'B105',
-    email: 'ahmed.hassan@university.edu.sa',
-    officeHours: 'الأحد والثلاثاء من 2-4 م',
-    status: 'متاح',
-  },
-  {
-    id: 2,
-    initials: 'ف ا',
-    name: 'د. فاطمة الدين',
-    engName: 'Dr. Fatima Al-Din',
-    department: 'الرياضيات',
-    office: 'A302',
-    email: 'fatima.aldin@university.edu.sa',
-    officeHours: 'الاثنين والأربعاء من 10-12 ص',
-    status: 'مشغول',
-  },
-  {
-    id: 3,
-    initials: 'م ش',
-    name: 'د. محمد الشامي',
-    engName: 'Dr. Mohammed Al-Shami',
-    department: 'الهندسة',
-    office: 'C201',
-    email: 'mohammed.shami@university.edu.sa',
-    officeHours: 'الأحد والخميس من 1-3 م',
-    status: 'متاح',
-  },
-  {
-    id: 4,
-    initials: 'س م',
-    name: 'د. سارة مؤمن',
-    engName: 'Dr. Sarah Moumen',
-    department: 'الكيمياء',
-    office: 'B207',
-    email: 'sarah.moumen@university.edu.sa',
-    officeHours: 'الثنين والجمعة من 3-5 م',
-    status: 'غير متاح',
-  },
-  {
-    id: 5,
-    initials: 'خ ع',
-    name: 'د. خالد العثالي',
-    engName: 'Dr. Khaled Al-Othali',
-    department: 'علوم الحاسب',
-    office: 'B108',
-    email: 'khaled.othali@university.edu.sa',
-    officeHours: 'الأحد والثلاثاء من 2-4 م',
-    status: 'متاح',
-  },
-  {
-    id: 6,
-    initials: 'ن ق',
-    name: 'د. نورة القحطاني',
-    engName: 'Dr. Noura Al-Qahtani',
-    department: 'الكيمياء',
-    office: 'A104',
-    email: 'noura.qahtani@university.edu.sa',
-    officeHours: 'الاثنين والأربعاء من 2-4 م',
-    status: 'مشغول',
-  },
-];
+/** Convert HH:MM (24h) → h:MM AM/PM for display */
+function formatTime(time: string): string {
+  const [h, m] = time.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${period}`;
+}
 
-const STATS = [
-  {
-    label: 'إجمالي أعضاء هيئة التدريس',
-    value: 124,
-    sublabel: 'عضو هيئة',
-    color: 'border-blue-500',
-    bgColor: 'bg-blue-50',
-  },
-  {
-    label: 'متاح الآن',
-    value: 68,
-    sublabel: '54.8% متاح',
-    color: 'border-green-500',
-    bgColor: 'bg-green-50',
-  },
-  {
-    label: 'مشغول',
-    value: 32,
-    sublabel: '25.8% مشغول',
-    color: 'border-yellow-500',
-    bgColor: 'bg-yellow-50',
-  },
-  {
-    label: 'غير متاح',
-    value: 24,
-    sublabel: 'آخر 19.4%',
-    color: 'border-red-500',
-    bgColor: 'bg-red-50',
-  },
-];
-
-const getStatusColor = (status: string) => {
-  const colors = {
-    متاح: 'bg-green-100 text-green-700',
-    مشغول: 'bg-yellow-100 text-yellow-700',
-    'غير متاح': 'bg-red-100 text-red-700',
-  };
-  return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-700';
-};
-
-const getAvatarColor = (status: string) => {
-  const colors = {
-    متاح: 'bg-green-100 text-green-700',
-    مشغول: 'bg-yellow-100 text-yellow-700',
-    'غير متاح': 'bg-red-100 text-red-700',
-  };
-  return colors[status as keyof typeof colors] || 'bg-blue-100 text-blue-700';
-};
+// Stats will be calculated dynamically from professorData
 
 export default function FacultyPage() {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const [selectedDeptFilter, setSelectedDeptFilter] = useState<number | 'all'>('all');
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string | 'all'>('all');
 
-  const filtered = FACULTY_DATA.filter(
-    (faculty) =>
-      faculty.name.includes(search) ||
-      faculty.engName.includes(search) ||
-      faculty.department.includes(search) ||
-      faculty.office.includes(search),
-  );
+  // Modal states
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedProfessorId, setSelectedProfessorId] = useState<number | null>(null);
 
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  const startIdx = (currentPage - 1) * itemsPerPage;
-  const paginatedFaculty = filtered.slice(startIdx, startIdx + itemsPerPage);
+  const itemsPerPage = 9;
+
+  const { data: departments = [] } = useDepartments();
+
+  // Fetch filtered data for the table
+  const {
+    data: professorData,
+    isLoading,
+    error,
+  } = useAdminProfessors({
+    page: currentPage,
+    limit: itemsPerPage,
+    departmentId: selectedDeptFilter === 'all' ? undefined : selectedDeptFilter,
+    status:
+      selectedStatusFilter === 'all'
+        ? undefined
+        : (selectedStatusFilter as 'AVAILABLE' | 'NOT_AVAILABLE'),
+    search: search || undefined,
+  });
+
+  // Fetch unfiltered data for stats
+  const { data: allProfessorsData, isLoading: isLoadingStats } = useAdminProfessors({
+    page: 1,
+    limit: 100, // Max allowed by backend
+    departmentId: undefined, // No filters for stats
+    status: undefined,
+    search: undefined,
+  });
+
+  // Transform professors to match Faculty table interface
+  const transformedFaculty = useMemo(() => {
+    return (professorData?.data || []).map((prof) => {
+      // Format office hours: "Mon 12:00 PM – 4:00 PM, Wed 2:00 PM – 6:00 PM" or "N/A"
+      const officeHoursText =
+        prof.office_hours && prof.office_hours.length > 0
+          ? prof.office_hours
+              .map((oh) => {
+                const dayShort = oh.day.substring(0, 3); // Mon, Tue, Wed, etc.
+                const start = formatTime(oh.start_time);
+                const end = formatTime(oh.end_time);
+                return `${dayShort} ${start} – ${end}`;
+              })
+              .join(', ')
+          : 'N/A';
+
+      return {
+        id: prof.id,
+        initials: prof.full_name
+          .split(' ')
+          .slice(0, 2)
+          .map((n) => n[0])
+          .join('')
+          .toUpperCase(),
+        name: prof.full_name,
+        engName: prof.full_name,
+        department: prof.department.name,
+        office: prof.office?.room_number || 'N/A',
+        email: prof.email,
+        phone_number: prof.phone_number || 'N/A',
+        officeHours: officeHoursText,
+        status: prof.status,
+      };
+    });
+  }, [professorData?.data]);
+
+  const totalPages = professorData?.meta.totalPages || 1;
+
+  // Calculate dynamic stats from all professors
+  const stats = useMemo(() => {
+    if (isLoadingStats || !allProfessorsData) {
+      return [
+        { label: 'Total Faculty', value: 0, sublabel: 'members', borderColor: 'border-primary' },
+        {
+          label: 'Available Now',
+          value: 0,
+          sublabel: '0% available',
+          borderColor: 'border-secondary',
+        },
+        {
+          label: 'Unavailable',
+          value: 0,
+          sublabel: '0% unavailable',
+          borderColor: 'border-destructive',
+        },
+      ];
+    }
+
+    const totalFaculty = allProfessorsData?.meta?.total || 0;
+    const allProfessors = allProfessorsData?.data || [];
+
+    const available = allProfessors.filter((p) => p.status === 'AVAILABLE').length;
+    const unavailable = allProfessors.filter((p) => p.status === 'NOT_AVAILABLE').length;
+
+    const availablePercent = totalFaculty > 0 ? ((available / totalFaculty) * 100).toFixed(1) : '0';
+    const unavailablePercent =
+      totalFaculty > 0 ? ((unavailable / totalFaculty) * 100).toFixed(1) : '0';
+
+    return [
+      {
+        label: 'Total Faculty',
+        value: totalFaculty,
+        sublabel: 'members',
+        borderColor: 'border-primary',
+      },
+      {
+        label: 'Available Now',
+        value: available,
+        sublabel: `${availablePercent}% available`,
+        borderColor: 'border-secondary',
+      },
+      {
+        label: 'Unavailable',
+        value: unavailable,
+        sublabel: `${unavailablePercent}% unavailable`,
+        borderColor: 'border-destructive',
+      },
+    ];
+  }, [allProfessorsData, isLoadingStats]);
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1); // Reset to page 1 when search changes
+  };
+
+  const handleAddFaculty = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleEditFaculty = (professorId: number) => {
+    setSelectedProfessorId(professorId);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteFaculty = (professorId: number) => {
+    setSelectedProfessorId(professorId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePageClick = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8" dir="rtl">
-      {/* Header */}
-      <div className="mb-8 rounded-lg bg-teal-700 p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="mb-2 flex items-center gap-2">
-              <span className="text-2xl">•</span>
-              <h1 className="text-2xl font-bold">Dolani • إدارة أعضاء هيئة التدريس</h1>
-            </div>
-            <p className="text-sm opacity-90">Faculty Management</p>
-            <p className="text-sm opacity-90">
-              Manage faculty information & offices • إدارة معلومات أعضاء هيئة التدريس والمكاتب
-            </p>
-          </div>
-          <Button className="gap-2 bg-white text-teal-700 hover:bg-gray-100">
-            <Plus size={18} />
-            إضافة عضو هيئة تدريس
-          </Button>
-        </div>
+    <div className="p-8">
+      {/* Header with Add Button */}
+      <div className="mb-8 flex items-center justify-end">
+        {/* prettier-ignore */}
+        <Button onClick={handleAddFaculty} className="gap-2 bg-primary hover:bg-primary/90">
+          <Plus size={18} />
+          Add Faculty
+        </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="mb-8 grid grid-cols-4 gap-4">
-        {STATS.map((stat, i) => (
-          <Card
-            key={i}
-            className={`border-4 border-l-8 ${stat.color} ${stat.bgColor} rounded-2xl p-6 shadow-sm`}
-          >
-            <p className="mb-3 text-sm font-medium text-gray-600">{stat.label}</p>
-            <p className="text-3xl font-bold text-gray-800">{stat.value}</p>
-            <p className="mt-1 text-xs text-gray-500">{stat.sublabel}</p>
-          </Card>
-        ))}
-      </div>
+      <FacultyStatsCards stats={stats} />
+      <FacultyFilters
+        searchTerm={search}
+        onSearchChange={handleSearchChange}
+        selectedDeptFilter={selectedDeptFilter}
+        onDeptFilterChange={(value) => {
+          setSelectedDeptFilter(value === 'all' ? 'all' : Number(value));
+          setCurrentPage(1); // Reset to page 1 when filter changes
+        }}
+        selectedStatusFilter={selectedStatusFilter}
+        onStatusFilterChange={(value) => {
+          setSelectedStatusFilter(value);
+          setCurrentPage(1); // Reset to page 1 when filter changes
+        }}
+        departments={departments}
+      />
+      <FacultyTable
+        faculty={transformedFaculty}
+        isLoading={isLoading}
+        error={error}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPrevPage={handlePrevPage}
+        onNextPage={handleNextPage}
+        onPageClick={handlePageClick}
+        onEdit={handleEditFaculty}
+        onDelete={handleDeleteFaculty}
+      />
 
-      {/* Search Section */}
-      <div className="mb-6 rounded-lg bg-white p-6">
-        <h2 className="mb-2 text-sm font-semibold text-gray-700">البحث والتصفية</h2>
-        <p className="mb-4 text-xs text-gray-500">
-          Search faculty and departments • البحث عن أعضاء هيئة التدريس والأقسام
-        </p>
-        <div className="flex gap-4">
-          <div className="flex flex-1 items-center gap-3 rounded-lg border-2 border-gray-200 bg-white px-4 py-2">
-            <Search size={18} className="text-gray-400" />
-            <Input
-              placeholder="ابحث عن أعضاء هيئة التدريس..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="border-0 bg-transparent text-sm placeholder-gray-400"
-            />
-          </div>
-          <select className="rounded-lg border-2 border-gray-200 bg-white px-4 py-2 text-sm text-gray-700">
-            <option>جميع الأقسام</option>
-          </select>
-          <select className="rounded-lg border-2 border-gray-200 bg-white px-4 py-2 text-sm text-gray-700">
-            <option>جميع الحالات</option>
-          </select>
-        </div>
-      </div>
+      {/* Faculty Modals */}
+      <FacultyModal
+        mode="add"
+        isOpen={isAddModalOpen}
+        onClose={() => {
+          setIsAddModalOpen(false);
+        }}
+      />
 
-      {/* Faculty List Header */}
-      <div className="mb-4">
-        <h2 className="text-sm font-semibold text-teal-600">قائمة أعضاء هيئة التدريس</h2>
-        <p className="text-xs text-gray-500">6 من 124 عضو هيئة تدريس</p>
-      </div>
-
-      {/* Table */}
-      <Card className="mb-8 overflow-hidden shadow-md">
-        <table className="w-full">
-          <thead className="border-b bg-gray-50">
-            <tr>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-teal-600">
-                الإجراءات
-              </th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-teal-600">الحالة</th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-teal-600">
-                ساعات الفصل
-              </th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-teal-600">الاتصال</th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-teal-600">المكتب</th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-teal-600">القسم</th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-teal-600">
-                اسم (English)
-              </th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-teal-600">
-                عضو هيئة التدريس
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {paginatedFaculty.map((faculty) => (
-              <tr key={faculty.id} className="transition-colors hover:bg-blue-50">
-                <td className="px-6 py-5">
-                  <div className="flex gap-3">
-                    <button className="text-gray-400 transition-colors hover:text-gray-600">
-                      <FileText size={18} />
-                    </button>
-                    <button className="text-gray-400 transition-colors hover:text-red-600">
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </td>
-                <td className="px-6 py-5">
-                  <span
-                    className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${getStatusColor(faculty.status)}`}
-                  >
-                    {faculty.status}
-                  </span>
-                </td>
-                <td className="px-6 py-5 text-xs text-gray-700">{faculty.officeHours}</td>
-                <td className="px-6 py-5 text-xs text-gray-700">{faculty.email}</td>
-                <td className="px-6 py-5">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-600">
-                      {faculty.office.charAt(0)}
-                    </div>
-                    <span className="text-xs font-semibold text-gray-800">{faculty.office}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-5 text-xs text-gray-700">{faculty.department}</td>
-                <td className="px-6 py-5 text-xs text-gray-700">{faculty.engName}</td>
-                <td className="px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`h-10 w-10 rounded-full ${getAvatarColor(faculty.status)} flex items-center justify-center text-xs font-bold`}
-                    >
-                      {faculty.initials}
-                    </div>
-                    <span className="text-xs font-semibold text-gray-800">{faculty.name}</span>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-600">عرض من 1 إلى 6 من 124 عضو هيئة تدريس</span>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 text-xs"
-          >
-            السابق
-          </Button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <Button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`h-8 w-8 rounded-full text-xs ${
-                currentPage === page
-                  ? 'bg-teal-700 text-white'
-                  : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              {page}
-            </Button>
-          ))}
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 text-xs"
-          >
-            التالي
-          </Button>
-        </div>
-      </div>
+      {selectedProfessorId && (
+        <>
+          <FacultyModal
+            mode="edit"
+            isOpen={isEditModalOpen}
+            professor={professorData?.data.find((p) => p.id === selectedProfessorId) || null}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setSelectedProfessorId(null);
+            }}
+          />
+          <DeleteFacultyDialog
+            isOpen={isDeleteDialogOpen}
+            professor={professorData?.data.find((p) => p.id === selectedProfessorId) || null}
+            onClose={() => {
+              setIsDeleteDialogOpen(false);
+              setSelectedProfessorId(null);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

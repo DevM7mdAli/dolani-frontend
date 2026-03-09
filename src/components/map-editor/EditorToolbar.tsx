@@ -5,6 +5,7 @@ import type { EditorTool } from '@/types/map';
 import {
   Circle,
   Hand,
+  Loader2,
   MousePointer2,
   Radio,
   RotateCcw,
@@ -129,7 +130,7 @@ export default function EditorToolbar({ onSave, isSaving }: EditorToolbarProps) 
             : 'text-muted-foreground opacity-40'
         }`}
       >
-        <Save className="size-4" />
+        {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
       </button>
     </div>
   );

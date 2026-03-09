@@ -2,258 +2,267 @@
 
 import { useState } from 'react';
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Edit2,
-  Mail,
-  MapPin,
-  Plus,
-  Search,
-  Trash2,
-} from 'lucide-react';
+import { AddRoomModal, RoomFilters, RoomStatsCards, RoomTable } from '@/components/admin/rooms';
+import { useDepartments } from '@/hooks/useDepartments';
+import { roomQueryKeys, useRoomsPaginated } from '@/hooks/useRooms';
+import type { Room } from '@/hooks/useRooms';
+import type { LocationTypeValue } from '@/types/admin';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
-const FACULTY_DATA = [
-  {
-    id: 1,
-    initials: 'أ ح',
-    name: 'د. أحمد حسن',
-    engName: 'Dr. Ahmad Hassan',
-    dept: 'علوم الحاسب',
-    office: 'B105',
-    email: 'ahmad.hassan@university.edu.sa',
-    hours: 'الأحد-الخميس 9 ص - 3 م',
-    status: 'متاح',
-  },
-  {
-    id: 2,
-    initials: 'ف ع',
-    name: 'د. فاطمة العلي',
-    engName: 'Dr. Fatima Al-Ali',
-    dept: 'الرياضيات',
-    office: 'A302',
-    email: 'fatima.ali@university.edu.sa',
-    hours: 'الأحد-الأربعاء 10 ص - 2 م',
-    status: 'مشغول',
-  },
-  {
-    id: 3,
-    initials: 'م ش',
-    name: 'د. محمد الشمري',
-    engName: 'Dr. Mohammed Al-Shammari',
-    dept: 'الهندسة',
-    office: 'C201',
-    email: 'mohammed.shammari@university.edu.sa',
-    hours: 'الاثنين-الخميس 1 م - 4 م',
-    status: 'متاح',
-  },
-  {
-    id: 4,
-    initials: 'س م',
-    name: 'د. سارة المطيري',
-    engName: 'Dr. Sarah Al-Mutairi',
-    dept: 'الفيزياء',
-    office: 'B307',
-    email: 'sarah.mutairi@university.edu.sa',
-    hours: 'الأحد-الثلاثاء 11 ص - 3 م',
-    status: 'غير متاح',
-  },
+import { adminApi } from '@/lib/api/admin';
+
+// Constants
+const LOCATION_TYPES: LocationTypeValue[] = [
+  'CLASSROOM',
+  'OFFICE',
+  'LAB',
+  'CONFERENCE',
+  'THEATER',
+  'CORRIDOR',
+  'EXIT',
+  'ELEVATOR',
+  'MAIN_HALL',
+  'RESTROOM',
+  'STAIRS',
+  'SERVICE',
+  'PRAYER_ROOM',
+  'SERVER_ROOM',
+  'STORE_ROOM',
+  'LOCKERS',
 ];
 
-export default function FacultyManagement() {
+const LOCATION_TYPE_DISPLAY: Record<LocationTypeValue, string> = {
+  CLASSROOM: 'Classrooms',
+  OFFICE: 'Office',
+  LAB: 'Lab',
+  CONFERENCE: 'Conferences',
+  THEATER: 'Theater',
+  CORRIDOR: 'Corridor',
+  EXIT: 'Exit',
+  ELEVATOR: 'Elevator',
+  MAIN_HALL: 'Main Hall',
+  RESTROOM: 'Restrooms',
+  STAIRS: 'Stairs',
+  SERVICE: 'Service',
+  PRAYER_ROOM: 'Prayer Room',
+  SERVER_ROOM: 'Server Room',
+  STORE_ROOM: 'Storage',
+  LOCKERS: 'Lockers',
+};
+
+export default function RoomManagement() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedDeptFilter, setSelectedDeptFilter] = useState<number | 'all'>('all');
+  const [selectedTypeFilter, setSelectedTypeFilter] = useState<string | 'all'>('all');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSubmittingRoom, setIsSubmittingRoom] = useState(false);
+  const [roomToEdit, setRoomToEdit] = useState<Room | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState<number | string | null>(null);
+
+  const pageSize = 9;
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, error } = useRoomsPaginated({
+    page: currentPage,
+    limit: pageSize,
+    departmentId: selectedDeptFilter === 'all' ? undefined : selectedDeptFilter,
+    type: selectedTypeFilter === 'all' ? undefined : selectedTypeFilter,
+    search: searchTerm || undefined,
+    displayMap: LOCATION_TYPE_DISPLAY,
+  });
+
+  const { data: departments = [] } = useDepartments();
+  const { data: floors = [] } = useQuery({
+    queryKey: ['admin', 'floors'],
+    queryFn: () => adminApi.getFloors(),
+  });
+
+  const stats = data?.statistics || {
+    total: 0,
+    offices: 0,
+    officesPercentage: 0,
+    labs: 0,
+    labsPercentage: 0,
+    classrooms: 0,
+    classroomsPercentage: 0,
+  };
+
+  const totalPages = data?.meta.totalPages || 1;
+  const rooms = data?.rooms || [];
+
+  const handleDeptFilterChange = (value: string) => {
+    setSelectedDeptFilter(value === 'all' ? 'all' : parseInt(value));
+    setCurrentPage(1);
+  };
+
+  const handleTypeFilterChange = (value: string) => {
+    setSelectedTypeFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  const handleEditRoom = (room: Room) => {
+    setRoomToEdit(room);
+    setIsAddModalOpen(true);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handlePageClick = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleAddRoom = async (data: {
+    name: string;
+    room_number: string;
+    type: LocationTypeValue;
+    floor_id: number;
+    department_id?: number | null;
+  }) => {
+    setIsSubmittingRoom(true);
+    try {
+      await adminApi.createLocation({
+        ...data,
+        coordinate_x: 0,
+        coordinate_y: 0,
+      });
+      setIsAddModalOpen(false);
+      setRoomToEdit(null);
+      // Refetch rooms data
+      queryClient.invalidateQueries({ queryKey: roomQueryKeys.list() });
+    } catch (err) {
+      console.error('Error adding room:', err);
+      throw err;
+    } finally {
+      setIsSubmittingRoom(false);
+    }
+  };
+
+  const handleDeleteRoom = (roomId: number | string) => {
+    setRoomToDelete(roomId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!roomToDelete) return;
+    setIsDeleting(true);
+    try {
+      await adminApi.deleteLocation(roomToDelete);
+      queryClient.invalidateQueries({ queryKey: roomQueryKeys.list() });
+      setRoomToDelete(null);
+    } catch (err) {
+      console.error('Error deleting room:', err);
+      alert('Failed to delete room. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setRoomToDelete(null);
+  };
 
   return (
-    <div className="dir-rtl min-h-screen bg-gray-50 p-6 text-right" dir="rtl">
-      {/* Top Action Bar - Add Button */}
-      <div className="mb-8 flex justify-end">
-        <Button className="flex items-center gap-2 rounded-lg bg-teal-700 px-6 py-2 text-white transition-colors hover:bg-teal-800">
+    <div className="min-h-screen p-6">
+      <div className="mb-10 flex items-end justify-end">
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          className="bg-primary hover:bg-primary/90 gap-2"
+        >
           <Plus className="h-5 w-5" />
-          <span>إضافة عضو هيئة تدريس</span>
+          <span>Add Room</span>
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
-        <Card className="border-l-4 border-l-blue-500 p-5 shadow-sm">
-          <p className="text-sm font-medium text-gray-500">إجمالي أعضاء هيئة التدريس</p>
-          <h3 className="mt-2 text-2xl font-bold">124</h3>
-          <p className="mt-1 text-xs text-gray-400">من 6 أقسام</p>
-        </Card>
-        <Card className="border-l-4 border-l-green-500 p-5 shadow-sm">
-          <p className="text-sm font-medium text-gray-500">متاح الآن</p>
-          <div className="mt-2 flex items-center gap-2">
-            <h3 className="text-2xl font-bold">68</h3>
-            <span className="text-xs font-bold text-green-500">58.1%</span>
-          </div>
-          <p className="text-xs text-green-500">متاح</p>
-        </Card>
-        <Card className="border-l-4 border-l-orange-400 p-5 shadow-sm">
-          <p className="text-sm font-medium text-gray-500">مشغول</p>
-          <div className="mt-2 flex items-center gap-2">
-            <h3 className="text-2xl font-bold">38</h3>
-            <span className="text-xs font-bold text-orange-400">25.9%</span>
-          </div>
-          <p className="text-xs text-orange-400">مشغول</p>
-        </Card>
-        <Card className="border-l-4 border-l-red-500 p-5 shadow-sm">
-          <p className="text-sm font-medium text-gray-500">غير متاح</p>
-          <div className="mt-2 flex items-center gap-2">
-            <h3 className="text-2xl font-bold">26</h3>
-            <span className="text-xs font-bold text-red-500">13.4%</span>
-          </div>
-          <p className="text-xs text-red-500">متاح</p>
-        </Card>
-      </div>
+      <RoomStatsCards stats={stats} isLoading={isLoading} />
 
-      {/* Filters Section */}
-      <Card className="mb-8 p-6 shadow-sm">
-        <div className="flex flex-col gap-4">
-          <div>
-            <h4 className="text-sm font-bold text-teal-800">البحث والتصفية</h4>
-            <p className="mt-1 text-xs text-gray-500">
-              البحث عن أعضاء هيئة التدريس والأقسام • Search faculty and departments
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="relative min-w-[300px] flex-1">
-              <Search className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                className="border-gray-200 bg-gray-50 pr-10"
-                placeholder="ابحث عن أعضاء هيئة التدريس..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <select className="min-w-[150px] rounded-md border border-gray-200 bg-gray-50 p-2 text-sm text-gray-600">
-              <option>جميع الأقسام</option>
-            </select>
-            <select className="min-w-[150px] rounded-md border border-gray-200 bg-gray-50 p-2 text-sm text-gray-600">
-              <option>جميع الحالات</option>
-            </select>
-          </div>
-        </div>
-      </Card>
+      <RoomFilters
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        selectedDeptFilter={selectedDeptFilter}
+        onDeptFilterChange={handleDeptFilterChange}
+        selectedTypeFilter={selectedTypeFilter}
+        onTypeFilterChange={handleTypeFilterChange}
+        departments={departments}
+        locationTypeDisplay={LOCATION_TYPE_DISPLAY}
+        locationTypes={LOCATION_TYPES}
+      />
 
-      {/* Table Section */}
-      <Card className="overflow-hidden shadow-sm">
-        <div className="border-b bg-white p-4">
-          <h4 className="font-bold text-teal-800">قائمة أعضاء هيئة التدريس</h4>
-          <p className="text-xs text-gray-500">6 من 124 عضو هيئة تدريس</p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-right">
-            <thead className="border-b bg-gray-50 text-sm text-gray-600">
-              <tr>
-                <th className="p-4 font-bold">عضو هيئة التدريس</th>
-                <th className="p-4 font-bold">القسم</th>
-                <th className="p-4 font-bold">المكتب</th>
-                <th className="p-4 font-bold">الاتصال</th>
-                <th className="p-4 font-bold">ساعات العمل</th>
-                <th className="p-4 font-bold">الحالة</th>
-                <th className="p-4 font-bold">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y text-sm">
-              {FACULTY_DATA.map((faculty) => (
-                <tr key={faculty.id} className="transition-colors hover:bg-gray-50">
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-teal-100 bg-teal-50 font-bold text-teal-700">
-                        {faculty.initials}
-                      </div>
-                      <div>
-                        <p className="font-bold text-gray-800">{faculty.name}</p>
-                        <p className="text-[10px] text-gray-400">{faculty.engName}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4 font-medium text-gray-600">{faculty.dept}</td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-1 text-gray-500">
-                      <MapPin className="h-3.5 w-3.5 text-teal-600" />
-                      <span>{faculty.office}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Mail className="h-3.5 w-3.5 text-gray-400" />
-                      <span className="text-xs">{faculty.email}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5 text-gray-400" />
-                      <span className="text-[11px]">{faculty.hours}</span>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span
-                      className={`rounded-full px-3 py-1 text-[10px] font-bold ${
-                        faculty.status === 'متاح'
-                          ? 'border border-green-200 bg-green-100 text-green-700'
-                          : faculty.status === 'مشغول'
-                            ? 'border border-orange-200 bg-orange-100 text-orange-700'
-                            : 'border border-red-200 bg-red-100 text-red-700'
-                      }`}
-                    >
-                      {faculty.status}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex gap-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-8 w-8 border-blue-100 text-blue-600 hover:bg-blue-50"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-8 w-8 border-red-100 text-red-500 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <RoomTable
+        rooms={rooms}
+        isLoading={isLoading}
+        error={error}
+        onEditRoom={handleEditRoom}
+        onDeleteRoom={handleDeleteRoom}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPrevPage={handlePrevPage}
+        onNextPage={handleNextPage}
+        onPageClick={handlePageClick}
+        isDeleting={isDeleting}
+      />
 
-        {/* Pagination */}
-        <div className="flex items-center justify-between border-t bg-white p-4">
-          <p className="text-xs font-medium text-gray-500">عرض 1-6 من 124 عضو هيئة تدريس</p>
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" className="h-8 gap-1 px-3 text-xs">
-              <span>التالي</span>
-              <ChevronLeft className="h-3 w-3" />
-            </Button>
-            {[3, 2, 1].map((n) => (
-              <Button
-                key={n}
-                variant={n === 1 ? 'default' : 'outline'}
-                size="icon"
-                className={`h-8 w-8 text-xs ${n === 1 ? 'bg-teal-800' : ''}`}
-              >
-                {n}
+      {roomToDelete && (
+        <Dialog open={!!roomToDelete} onOpenChange={() => setRoomToDelete(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Delete</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this room? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex gap-2">
+              <Button variant="outline" onClick={handleCancelDelete} disabled={isDeleting}>
+                Cancel
               </Button>
-            ))}
-            <Button variant="outline" size="sm" className="h-8 gap-1 px-3 text-xs">
-              <ChevronRight className="h-3 w-3" />
-              <span>السابق</span>
-            </Button>
-          </div>
-        </div>
-      </Card>
+              <Button variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting}>
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      <AddRoomModal
+        isOpen={isAddModalOpen}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setRoomToEdit(null);
+        }}
+        onSubmit={handleAddRoom}
+        floors={floors}
+        departments={departments}
+        locationTypes={LOCATION_TYPES}
+        locationTypeDisplay={LOCATION_TYPE_DISPLAY}
+        isSubmitting={isSubmittingRoom}
+        roomToEdit={roomToEdit}
+      />
     </div>
   );
 }

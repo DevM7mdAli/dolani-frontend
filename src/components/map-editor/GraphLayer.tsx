@@ -11,22 +11,29 @@ import { Circle, Group, Layer, Line, Text } from 'react-konva';
 // Visual constants
 // ============================================================================
 
-const NODE_RADIUS = 10;
-const BEACON_RADIUS = 8;
+const NODE_RADIUS = 4;
+const BEACON_RADIUS = 3;
 
 const TYPE_COLORS: Record<LocationType, string> = {
   [LocationType.CLASSROOM]: '#3B82F6', // blue
-  [LocationType.CORRIDOR]: '#9CA3AF', // gray
-  [LocationType.ELEVATOR]: '#8B5CF6', // violet
-  [LocationType.STAIRS]: '#F59E0B', // amber
-  [LocationType.RESTROOM]: '#06B6D4', // cyan
-  [LocationType.EXIT]: '#EF4444', // red
   [LocationType.OFFICE]: '#10B981', // emerald
+  [LocationType.CORRIDOR]: '#9CA3AF', // gray
   [LocationType.LAB]: '#EC4899', // pink
-  [LocationType.AUDITORIUM]: '#F97316', // orange
-  [LocationType.LIBRARY]: '#6366F1', // indigo
+  [LocationType.THEATER]: '#F97316', // orange
+  [LocationType.CONFERENCE]: '#A855F7', // purple
+  [LocationType.EXIT]: '#EF4444', // red
+  [LocationType.ELEVATOR]: '#8B5CF6', // violet
+  [LocationType.MAIN_HALL]: '#14B8A6', // teal
+  [LocationType.RESTROOM]: '#06B6D4', // cyan
+  [LocationType.STAIRS]: '#F59E0B', // amber
+  [LocationType.SERVICE]: '#78716C', // stone
+  [LocationType.PRAYER_ROOM]: '#059669', // emerald-dark
+  [LocationType.SERVER_ROOM]: '#6366F1', // indigo
+  [LocationType.STORE_ROOM]: '#D97706', // amber-dark
+  [LocationType.LOCKERS]: '#0EA5E9', // sky
   [LocationType.CAFETERIA]: '#84CC16', // lime
-  [LocationType.OTHER]: '#6B7280', // neutral
+  [LocationType.WAITING_HALL]: '#E879F9', // fuchsia
+  [LocationType.ELECTRICAL_ROOM]: '#DC2626', // red-dark
 };
 
 // ============================================================================
@@ -142,7 +149,7 @@ export default function GraphLayer() {
               <Circle
                 x={node.coordinate_x}
                 y={node.coordinate_y}
-                radius={NODE_RADIUS + 4}
+                radius={NODE_RADIUS + 3}
                 stroke={isPathSource ? '#22D3EE' : '#FFD700'}
                 strokeWidth={2}
                 dash={isPathSource ? [4, 3] : undefined}
@@ -155,7 +162,8 @@ export default function GraphLayer() {
               radius={NODE_RADIUS}
               fill={TYPE_COLORS[node.type] ?? '#6B7280'}
               stroke="#FFFFFF"
-              strokeWidth={1.5}
+              strokeWidth={1}
+              hitStrokeWidth={15}
               draggable={draggable}
               onClick={() => handleNodeClick(node.id)}
               onTap={() => handleNodeClick(node.id)}
@@ -164,18 +172,18 @@ export default function GraphLayer() {
               }}
               onDragEnd={(e) => handleNodeDragEnd(node.id, e)}
               shadowColor="black"
-              shadowBlur={4}
+              shadowBlur={3}
               shadowOpacity={0.25}
               shadowOffsetY={1}
             />
             {/* Label */}
-            {node.name && (
+            {node.name && isSelected && (
               <Text
-                x={node.coordinate_x + NODE_RADIUS + 4}
-                y={node.coordinate_y - 6}
+                x={node.coordinate_x + NODE_RADIUS + 3}
+                y={node.coordinate_y - 5}
                 text={node.name}
-                fontSize={11}
-                fill="#FFFFFF"
+                fontSize={6}
+                fill="#00f000d"
                 listening={false}
               />
             )}
@@ -194,7 +202,7 @@ export default function GraphLayer() {
               <Circle
                 x={beacon.coordinate_x}
                 y={beacon.coordinate_y}
-                radius={BEACON_RADIUS + 4}
+                radius={BEACON_RADIUS + 3}
                 stroke="#FFD700"
                 strokeWidth={2}
                 listening={false}
@@ -204,7 +212,7 @@ export default function GraphLayer() {
             <Circle
               x={beacon.coordinate_x}
               y={beacon.coordinate_y}
-              radius={BEACON_RADIUS + 8}
+              radius={BEACON_RADIUS + 5}
               stroke="#22D3EE"
               strokeWidth={1}
               opacity={0.4}
@@ -216,7 +224,8 @@ export default function GraphLayer() {
               radius={BEACON_RADIUS}
               fill="#22D3EE"
               stroke="#FFFFFF"
-              strokeWidth={1.5}
+              strokeWidth={1}
+              hitStrokeWidth={15}
               draggable={draggable}
               onClick={() => handleBeaconClick(beacon.id)}
               onTap={() => handleBeaconClick(beacon.id)}
@@ -224,10 +233,10 @@ export default function GraphLayer() {
             />
             {beacon.name && (
               <Text
-                x={beacon.coordinate_x + BEACON_RADIUS + 4}
-                y={beacon.coordinate_y - 6}
+                x={beacon.coordinate_x + BEACON_RADIUS + 3}
+                y={beacon.coordinate_y - 5}
                 text={beacon.name}
-                fontSize={10}
+                fontSize={9}
                 fill="#22D3EE"
                 listening={false}
               />

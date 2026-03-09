@@ -30,18 +30,56 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/${locale}/signin`, request.url));
   }
 
-  // If accessing signin while authenticated, redirect to dashboard
-  if (route === '/signin' && hasSession) {
+  // Validate role-based dashboard access
+  if (isProtectedRoute && hasSession) {
     const userRole = request.cookies.get('userRole')?.value || 'FACULTY';
-    const dashboardPath =
-      userRole === 'ADMIN'
-        ? '/dashboard/admin'
-        : userRole === 'IT'
+
+    // Check dashboard access by role
+    const isAdminDashboard = route.startsWith('/dashboard/admin');
+    const isITDashboard = route.startsWith('/dashboard/it');
+    const isSecurityDashboard = route.startsWith('/dashboard/security');
+    const isFacultyDashboard = route.startsWith('/dashboard/doctors');
+
+    // Validate role matches dashboard
+    if (isAdminDashboard && userRole !== 'ADMIN') {
+      const correctPath =
+        userRole === 'IT'
           ? '/dashboard/it'
           : userRole === 'SECURITY'
             ? '/dashboard/security'
             : '/dashboard/doctors';
-    return NextResponse.redirect(new URL(`/${locale}${dashboardPath}`, request.url));
+      return NextResponse.redirect(new URL(`/${locale}${correctPath}`, request.url));
+    }
+
+    if (isITDashboard && userRole !== 'IT') {
+      const correctPath =
+        userRole === 'ADMIN'
+          ? '/dashboard/admin'
+          : userRole === 'SECURITY'
+            ? '/dashboard/security'
+            : '/dashboard/doctors';
+      return NextResponse.redirect(new URL(`/${locale}${correctPath}`, request.url));
+    }
+
+    if (isSecurityDashboard && userRole !== 'SECURITY') {
+      const correctPath =
+        userRole === 'ADMIN'
+          ? '/dashboard/admin'
+          : userRole === 'IT'
+            ? '/dashboard/it'
+            : '/dashboard/doctors';
+      return NextResponse.redirect(new URL(`/${locale}${correctPath}`, request.url));
+    }
+
+    if (isFacultyDashboard && userRole !== 'FACULTY') {
+      const correctPath =
+        userRole === 'ADMIN'
+          ? '/dashboard/admin'
+          : userRole === 'IT'
+            ? '/dashboard/it'
+            : '/dashboard/security';
+      return NextResponse.redirect(new URL(`/${locale}${correctPath}`, request.url));
+    }
   }
 
   return response;

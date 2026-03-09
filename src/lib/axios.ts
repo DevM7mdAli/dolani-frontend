@@ -16,6 +16,11 @@ const apiClient = axios.create({
 // ---------------------------------------------------------------------------
 apiClient.interceptors.request.use(
   (config) => {
+    // Skip if Authorization header already set (e.g., during retry)
+    if (config.headers.Authorization) {
+      return config;
+    }
+
     const { accessToken } = useAuthStore.getState();
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -103,13 +108,6 @@ apiClient.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
-    }
-
-    // Log non-401 errors for debugging
-    if (error.response) {
-      console.error(`[API Error] ${error.response.status}:`, error.response.data);
-    } else {
-      console.error('[API Error] Network/Unknown:', error.message);
     }
 
     return Promise.reject(error);

@@ -137,6 +137,7 @@
     "nodeProperties": "Node Properties",
     "edgeProperties": "Edge Properties",
     "beaconProperties": "Beacon Properties",
+    "loading": "Please wait we are loading the points...",
     "tools": {
       "select": "Select",
       "node": "Add Node",
@@ -168,7 +169,8 @@
       "beaconName": "Beacon Name",
       "beaconUuid": "Beacon UUID",
       "linkedNode": "Linked Node",
-      "none": "— None —"
+      "none": "— None —",
+      "department": "Department"
     }
   },
   "IT": {

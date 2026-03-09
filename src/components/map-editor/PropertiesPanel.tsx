@@ -1,8 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import { useEditorStore } from '@/store/useEditorStore';
 import { LocationType } from '@/types/map';
 import { useTranslations } from 'next-intl';
+
+import { type DepartmentResponse, adminApi } from '@/lib/api/admin';
 
 /**
  * Context-sensitive properties panel displayed on the right side of the editor.
@@ -17,6 +21,15 @@ export default function PropertiesPanel() {
   const updateNode = useEditorStore((s) => s.updateNode);
   const updateEdge = useEditorStore((s) => s.updateEdge);
   const updateBeacon = useEditorStore((s) => s.updateBeacon);
+
+  const [departments, setDepartments] = useState<DepartmentResponse[]>([]);
+
+  useEffect(() => {
+    adminApi
+      .getDepartments()
+      .then(setDepartments)
+      .catch(() => {});
+  }, []);
 
   // Nothing selected
   if (!selection.id || !selection.type) {
@@ -66,6 +79,25 @@ export default function PropertiesPanel() {
             {Object.values(LocationType).map((lt) => (
               <option key={lt} value={lt}>
                 {lt}
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label={t('fields.department')}>
+          <select
+            value={node.department_id ?? ''}
+            onChange={(e) =>
+              updateNode(node.id, {
+                department_id: e.target.value ? Number(e.target.value) : null,
+              })
+            }
+            className="input-base"
+          >
+            <option value="">{t('fields.none')}</option>
+            {departments.map((dept) => (
+              <option key={dept.id} value={dept.id}>
+                {dept.name}
               </option>
             ))}
           </select>
